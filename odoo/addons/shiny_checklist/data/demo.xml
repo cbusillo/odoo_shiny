@@ -1,0 +1,64 @@
+<odoo>
+    <data noupdate="1">
+
+        <!-- Technicians -->
+        <record id="demo_technician_1" model="shiny_checklist.technician">
+            <field name="name">Chris</field>
+        </record>
+
+        <record id="demo_technician_2" model="shiny_checklist.technician">
+            <field name="name">Austin</field>
+        </record>
+
+        <!-- Tests -->
+        <record id="demo_test_1" model="shiny_checklist.test">
+            <field name="name">Keyboard</field>
+            <field name="code">KB</field>
+            <field name="sort_order">1</field>
+        </record>
+
+        <record id="demo_test_2" model="shiny_checklist.test">
+            <field name="name">LCD</field>
+            <field name="code">LCD</field>
+            <field name="sort_order">2</field>
+        </record>
+
+        <!-- Specs -->
+        <record id="demo_spec_1" model="shiny_checklist.spec">
+            <field name="name">Processor</field>
+            <field name="sort_order">1</field>
+        </record>
+
+        <record id="demo_spec_2" model="shiny_checklist.spec">
+            <field name="name">Year</field>
+            <field name="sort_order">2</field>
+        </record>
+
+        <!-- Device Types -->
+        <record id="demo_device_type_1" model="shiny_checklist.device_type">
+            <field name="name">MacBook Pro</field>
+        </record>
+
+        <record id="demo_device_type_2" model="shiny_checklist.device_type">
+            <field name="name">iPhone</field>
+        </record>
+
+        <!-- Device Parts -->
+        <record id="demo_device_part_1" model="shiny_checklist.device_part">
+            <field name="name">Complete Assembly</field>
+        </record>
+
+        <record id="demo_device_part_2" model="shiny_checklist.device_part">
+            <field name="name">LCD Assembly</field>
+        </record>
+
+        <!-- Devices -->
+        <record id="demo_device_1" model="shiny_checklist.device">
+            <field name="device_type_id" ref="demo_device_type_1"/>
+            <field name="device_part_id" ref="demo_device_part_1"/>
+            <field name="spec_ids" eval="[(6, 0, [ref('demo_spec_1'), ref('demo_spec_2')])]"/>
+            <field name="test_ids" eval="[(6, 0, [ref('demo_test_1'), ref('demo_test_2')])]"/>
+        </record>
+
+    </data>
+</odoo>

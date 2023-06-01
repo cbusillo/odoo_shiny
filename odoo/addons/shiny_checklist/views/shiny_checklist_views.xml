@@ -1,0 +1,265 @@
+<odoo>
+    <data>
+
+        <!-- Main Menu -->
+        <menuitem id="main_menu" name="Shiny Checklist" sequence="-10"/>
+        <menuitem id="setup_menu" name="Setup" parent="main_menu"/>
+
+        <!-- Technician -->
+        <record id="view_tech_form" model="ir.ui.view">
+            <field name="name">tech.form</field>
+            <field name="model">shiny_checklist.tech</field>
+            <field name="arch" type="xml">
+                <form string="Technician">
+                    <sheet>
+                        <group>
+                            <field name="user_id"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="view_tech_tree" model="ir.ui.view">
+            <field name="name">tech.tree</field>
+            <field name="model">shiny_checklist.tech</field>
+            <field name="arch" type="xml">
+                <tree string="Tech Name">
+                    <field name="user_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_techs" model="ir.actions.act_window">
+            <field name="name">Technicians</field>
+            <field name="res_model">shiny_checklist.tech</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <menuitem id="sub_menu_techs" name="Technicians" action="action_techs" parent="setup_menu" sequence="10"/>
+
+        <!-- Test -->
+        <record id="view_test_form" model="ir.ui.view">
+            <field name="name">test.form</field>
+            <field name="model">shiny_checklist.test</field>
+            <field name="arch" type="xml">
+                <form string="Test">
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                            <field name="sort_order"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="action_tests" model="ir.actions.act_window">
+            <field name="name">Tests</field>
+            <field name="res_model">shiny_checklist.test</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <menuitem id="sub_menu_tests" name="Tests" action="action_tests" parent="setup_menu" sequence="20"/>
+
+        <!-- Spec -->
+        <record id="view_spec_form" model="ir.ui.view">
+            <field name="name">spec.form</field>
+            <field name="model">shiny_checklist.spec</field>
+            <field name="arch" type="xml">
+                <form string="Spec">
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="sort_order"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="action_specs" model="ir.actions.act_window">
+            <field name="name">Specs</field>
+            <field name="res_model">shiny_checklist.spec</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <menuitem id="sub_menu_specs" name="Specs" action="action_specs" parent="setup_menu" sequence="30"/>
+
+        <!-- Spec Options -->
+
+        <record id="view_spec_option" model="ir.ui.view">
+            <field name="name">spec_option.form</field>
+            <field name="model">shiny_checklist.spec_option</field>
+            <field name="arch" type="xml">
+                <form string="Spec Option">
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="spec_ids"/>
+                            <field name="device_type_ids"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="view_spec_option_tree" model="ir.ui.view">
+            <field name="name">spec_option.tree</field>
+            <field name="model">shiny_checklist.spec_option</field>
+            <field name="arch" type="xml">
+                <tree string="Device">
+                    <field name="name"/>
+                    <field name="spec_ids"/>
+                    <field name="device_type_ids"/>
+
+                </tree>
+            </field>
+
+        </record>
+        <record id="action_spec_options" model="ir.actions.act_window">
+            <field name="name">Spec Options</field>
+            <field name="res_model">shiny_checklist.spec_option</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <menuitem id="sub_menu_spec_options" name="Spec Options" action="action_spec_options" parent="setup_menu" sequence="40"/>
+
+        <!-- DeviceType -->
+        <record id="view_device_type_form" model="ir.ui.view">
+            <field name="name">device_type.form</field>
+            <field name="model">shiny_checklist.device_type</field>
+            <field name="arch" type="xml">
+                <form string="Device Type">
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="action_device_types" model="ir.actions.act_window">
+            <field name="name">Device Types</field>
+            <field name="res_model">shiny_checklist.device_type</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <menuitem id="sub_menu_device_types" name="Device Types" action="action_device_types" parent="setup_menu" sequence="50"/>
+
+        <!-- DevicePart -->
+        <record id="view_device_part_form" model="ir.ui.view">
+            <field name="name">device_part.form</field>
+            <field name="model">shiny_checklist.device_part</field>
+            <field name="arch" type="xml">
+                <form string="Device Part">
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="action_device_parts" model="ir.actions.act_window">
+            <field name="name">Device Parts</field>
+            <field name="res_model">shiny_checklist.device_part</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <menuitem id="sub_menu_device_parts" name="Device Parts" action="action_device_parts" parent="setup_menu" sequence="60"/>
+
+        <!-- Device -->
+        <record id="view_device_form" model="ir.ui.view">
+            <field name="name">device.form</field>
+            <field name="model">shiny_checklist.device</field>
+            <field name="arch" type="xml">
+                <form string="Device">
+                    <sheet>
+                        <group>
+                            <field name="device_type_id"/>
+                            <field name="device_part_id"/>
+                            <field name="spec_ids"/>
+                            <field name="test_ids"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_device_tree" model="ir.ui.view">
+            <field name="name">device.tree</field>
+            <field name="model">shiny_checklist.device</field>
+            <field name="arch" type="xml">
+                <tree string="Device">
+                    <field name="device_type_id"/>
+                    <field name="device_part_id"/>
+                </tree>
+            </field>
+
+        </record>
+
+        <record id="action_devices" model="ir.actions.act_window">
+            <field name="name">Devices</field>
+            <field name="res_model">shiny_checklist.device</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <menuitem id="sub_menu_devices" name="Devices" action="action_devices" parent="setup_menu" sequence="70"/>
+
+        <!-- Checklist -->
+        <record id="view_checklist_form" model="ir.ui.view">
+            <field name="name">shiny_checklist.checklist.form</field>
+            <field name="model">shiny_checklist.checklist</field>
+            <field name="arch" type="xml">
+                <form string="Checklist">
+                    <sheet>
+                        <group>
+                            <field name="device_type_id"/>
+                            <field name="device_part_id"/>
+                            <field name="tech_id"/>
+                            <field name="date"/>
+                            <field name="serial_number"/>
+                        </group>
+                        <notebook>
+                            <page string="Spec Results">
+                                <field name="spec_result_ids" context="{'default_checklist_id': active_id}">
+                                    <tree editable="bottom">
+                                        <field name="spec_id"/>
+                                        <field name="device_type_id" invisible="1"/>
+                                        <field name="spec_option_id" domain="[('device_type_ids', '=', device_type_id), ('spec_ids', '=', spec_id)]"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Test Results">
+                                <field name="test_result_ids" context="{'default_checklist_id': active_id}">
+                                    <tree editable="bottom">
+                                        <field name="test_id"/>
+                                        <field name="test_result" widget="radio"/>
+                                        <field name="test_comment"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="view_checklist_tree" model="ir.ui.view">
+            <field name="name">checklist.tree</field>
+            <field name="model">shiny_checklist.checklist</field>
+            <field name="arch" type="xml">
+                <tree string="Checklists">
+                    <field name="device_type_id"/>
+                    <field name="device_part_id"/>
+                    <field name="tech_id"/>
+                    <field name="date"/>
+                    <field name="serial_number"/>
+                    <field name="spec_option_ids" invisible="1"/>
+                    <field name="test_result_ids" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+
+        <record id="action_checklist" model="ir.actions.act_window">
+            <field name="name">Checklists</field>
+            <field name="res_model">shiny_checklist.checklist</field>
+            <field name="view_mode">tree,form,kanban,graph,pivot,search,activity</field>
+        </record>
+        <menuitem id="sub_menu_checklist" name="Checklists" parent="main_menu" action="action_checklist" sequence="1"/>
+
+    </data>
+</odoo>
