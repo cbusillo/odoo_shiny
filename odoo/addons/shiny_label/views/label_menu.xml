@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- Action -->
+        <record id="action_label_groups" model="ir.actions.act_window">
+            <field name="name">Label Groups</field>
+            <field name="res_model">shiny_label.label_group</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                Create the first label group
+                </p>
+            </field>
+        </record>
+        <record id="action_labels" model="ir.actions.act_window">
+            <field name="name">Labels</field>
+            <field name="res_model">shiny_label.label</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                Create the first label group
+                </p>
+            </field>
+        </record>
+
+
+
+
+        <!-- Menu -->
+        <menuitem id="main_menu" name="Shiny Label" sequence="-9" />
+        <menuitem id="setup_menu" name="Setup" parent="main_menu" sequence="10"/>
+
+        <menuitem id="label_menu" name="Labels" parent="setup_menu" sequence="20" action="action_labels"/>
+
+        <menuitem id="label_group" name="Label Groups" parent="setup_menu" sequence="10" action="action_label_groups"/>
+
+    </data>
+</odoo>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_label_group_tree" model="ir.ui.view">
+        <field name="name">shiny_label.label_group.tree</field>
+        <field name="model">shiny_label.label_group</field>
+        <field name="arch" type="xml">
+            <tree string="Label Group" editable="top">
+                <field name="name"/>
+                <field name="label_ids" widget="many2many_checkboxes" />
+                <field name="printer_ip"/>
+                <field name="sort_order" widget="handle"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_label_group_form" model="ir.ui.view">
+        <field name="name">shiny_label.label_group.form</field>
+        <field name="model">shiny_label.label_group</field>
+        <field name="arch" type="xml">
+            <form string="Label Group">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="printer_ip"/>
+                        <field name="sort_order"/>
+                    </group>
+                    <group string="Labels">
+                        <field name="label_ids" widget="many2many_checkboxes">
+                            <tree>
+                                <field name="name"/>
+                                <field name="sort_order"/>
+                            </tree>
+
+                        </field>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

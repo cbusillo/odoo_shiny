@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+shiny_label.access_shiny_label_label_group,access_shiny_label_label_group,shiny_label.model_shiny_label_label_group,base.group_user,1,0,0,0
+shiny_label.access_shiny_label_label,access_shiny_label_label,shiny_label.model_shiny_label_label,base.group_user,1,0,0,0
