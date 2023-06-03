@@ -5,37 +5,6 @@
         <menuitem id="main_menu" name="Shiny Checklist" sequence="-10"/>
         <menuitem id="setup_menu" name="Setup" parent="main_menu"/>
 
-        <!-- Technician -->
-        <record id="view_tech_form" model="ir.ui.view">
-            <field name="name">tech.form</field>
-            <field name="model">shiny_checklist.tech</field>
-            <field name="arch" type="xml">
-                <form string="Technician">
-                    <sheet>
-                        <group>
-                            <field name="user_id"/>
-                        </group>
-                    </sheet>
-                </form>
-            </field>
-        </record>
-        <record id="view_tech_tree" model="ir.ui.view">
-            <field name="name">tech.tree</field>
-            <field name="model">shiny_checklist.tech</field>
-            <field name="arch" type="xml">
-                <tree string="Tech Name">
-                    <field name="user_id"/>
-                </tree>
-            </field>
-        </record>
-
-        <record id="action_techs" model="ir.actions.act_window">
-            <field name="name">Technicians</field>
-            <field name="res_model">shiny_checklist.tech</field>
-            <field name="view_mode">tree,form</field>
-        </record>
-        <menuitem id="sub_menu_techs" name="Technicians" action="action_techs" parent="setup_menu" sequence="10"/>
-
         <!-- Test -->
         <record id="view_test_form" model="ir.ui.view">
             <field name="name">test.form</field>
@@ -207,7 +176,7 @@
                         <group>
                             <field name="device_type_id"/>
                             <field name="device_part_id"/>
-                            <field name="tech_id"/>
+                            <field name="user_id"/>
                             <field name="date"/>
                             <field name="serial_number"/>
                         </group>
@@ -244,7 +213,7 @@
                 <tree string="Checklists">
                     <field name="device_type_id"/>
                     <field name="device_part_id"/>
-                    <field name="tech_id"/>
+                    <field name="user_id"/>
                     <field name="date"/>
                     <field name="serial_number"/>
                     <field name="spec_option_ids" invisible="1"/>

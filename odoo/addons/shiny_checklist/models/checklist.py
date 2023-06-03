@@ -1,14 +1,4 @@
 from odoo import models, fields, api
-import logging
-
-_logger = logging.getLogger(__name__)
-
-
-class Tech(models.Model):
-    _name = "shiny_checklist.tech"
-    _description = "Name of the tech testing the device."
-
-    user_id = fields.Many2one("res.users", string="Technician", required=True)
 
 
 class Test(models.Model):
@@ -108,7 +98,7 @@ class Checklist(models.Model):
 
     device_type_id = fields.Many2one("shiny_checklist.device_type", required=True)
     device_part_id = fields.Many2one("shiny_checklist.device_part", required=True)
-    tech_id = fields.Many2one("shiny_checklist.tech", required=True)
+    user_id = fields.Many2one("res.users", string="Technician", required=True)
     date = fields.Date(default=fields.Date.today, required=True)
     serial_number = fields.Char(required=False)
     test_result_ids = fields.One2many("shiny_checklist.test_result", "checklist_id", string="Test Results")
