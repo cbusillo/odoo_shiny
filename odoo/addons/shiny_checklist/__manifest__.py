@@ -5,12 +5,13 @@
     "version": "16.0.0.0.3",
     "summary": "Checklist app",
     "category": "Industries",
-    "author": "Shiny Computers",
+    "author": "Chris Busillo",
     "company": "Shiny Computers",
     "website": "https://www.shinycomputers.com",
     "depends": ["base", "product"],
     "data": [
         "views/shiny_checklist_views.xml",
+        "security/ir.model.access.csv",
     ],
     "demo": [
         "data/demo.xml",
