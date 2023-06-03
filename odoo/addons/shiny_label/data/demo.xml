@@ -1,0 +1,124 @@
+<?xml version="1.0" ?>
+<odoo>
+  <data noupdate="1">
+    <record id="demo_label_5" model="shiny_label.label">
+      <field name="id">5</field>
+      <field name="name">Fully Functional</field>
+      <field name="sort_order">0</field>
+    </record>
+    <record id="demo_label_6" model="shiny_label.label">
+      <field name="id">6</field>
+      <field name="name">Good</field>
+      <field name="sort_order">0</field>
+    </record>
+    <record id="demo_label_7" model="shiny_label.label">
+      <field name="id">7</field>
+      <field name="name">Bad</field>
+      <field name="sort_order">0</field>
+    </record>
+    <record id="demo_label_8" model="shiny_label.label">
+      <field name="id">8</field>
+      <field name="name">SSD Fan Control</field>
+      <field name="sort_order">0</field>
+    </record>
+    <record id="demo_label_9" model="shiny_label.label">
+      <field name="id">9</field>
+      <field name="name">RMA</field>
+      <field name="sort_order">0</field>
+    </record>
+    <record id="demo_label_10" model="shiny_label.label">
+      <field name="id">10</field>
+      <field name="name">MS RMA</field>
+      <field name="sort_order">0</field>
+    </record>
+    <record id="demo_label_11" model="shiny_label.label">
+      <field name="id">11</field>
+      <field name="name">IG RMA</field>
+      <field name="sort_order">0</field>
+    </record>
+    <record id="demo_label_12" model="shiny_label.label">
+      <field name="id">12</field>
+      <field name="name">PTR RMA</field>
+      <field name="sort_order">0</field>
+    </record>
+    <record id="demo_label_13" model="shiny_label.label">
+      <field name="id">13</field>
+      <field name="name">Grade C</field>
+      <field name="sort_order">0</field>
+    </record>
+    <record id="demo_label_14" model="shiny_label.label">
+      <field name="id">14</field>
+      <field name="name">Grade D</field>
+      <field name="sort_order">0</field>
+    </record>
+    <record id="demo_label_15" model="shiny_label.label">
+      <field name="id">15</field>
+      <field name="name">Grade F</field>
+      <field name="sort_order">0</field>
+    </record>
+    <record id="demo_label_16" model="shiny_label.label">
+      <field name="id">16</field>
+      <field name="name">Part Out</field>
+      <field name="sort_order">0</field>
+    </record>
+    <record id="demo_label_17" model="shiny_label.label">
+      <field name="id">17</field>
+      <field name="name">Bench Use</field>
+      <field name="sort_order">0</field>
+    </record>
+    <record id="demo_label_18" model="shiny_label.label">
+      <field name="id">18</field>
+      <field name="name">app.shinycomputers.com</field>
+      <field name="sort_order">0</field>
+    </record>
+    <record id="demo_label_19" model="shiny_label.label">
+      <field name="id">19</field>
+      <field name="name">TBT</field>
+      <field name="sort_order">0</field>
+    </record>
+    <record id="demo_label_20" model="shiny_label.label">
+      <field name="id">20</field>
+      <field name="name">Donated</field>
+      <field name="sort_order">0</field>
+    </record>
+    <record id="demo_label_21" model="shiny_label.label">
+      <field name="id">21</field>
+      <field name="name">Customer</field>
+      <field name="sort_order">0</field>
+    </record>
+    <record id="demo_label_22" model="shiny_label.label">
+      <field name="id">22</field>
+      <field name="name">eBay</field>
+      <field name="sort_order">0</field>
+    </record>
+    <record id="demo_label_23" model="shiny_label.label">
+      <field name="id">23</field>
+      <field name="name">Scrap NOT Wiped</field>
+      <field name="sort_order">0</field>
+    </record>
+    <record id="demo_label_24" model="shiny_label.label">
+      <field name="id">24</field>
+      <field name="name">Scrap Wiped</field>
+      <field name="sort_order">0</field>
+    </record>
+    <record id="demo_label_25" model="shiny_label.label">
+      <field name="id">25</field>
+      <field name="name">List on eBay</field>
+      <field name="sort_order">0</field>
+    </record>
+    <record id="demo_label_group_3" model="shiny_label.label_group">
+      <field name="id">3</field>
+      <field name="name">Front</field>
+      <field name="sort_order">0</field>
+      <field name="label_ids" eval="[(6, 0, [ref('demo_label_5'), ref('demo_label_6'), ref('demo_label_7'), ref('demo_label_8'), ref('demo_label_9'), ref('demo_label_10'), ref('demo_label_11'), ref('demo_label_12'), ref('demo_label_13'), ref('demo_label_14'), ref('demo_label_15'), ref('demo_label_16'), ref('demo_label_17'), ref('demo_label_18'), ref('demo_label_19'), ref('demo_label_20'), ref('demo_label_21'), ref('demo_label_22')])]"/>
+      <field name="printer_ip">192.168.1.240</field>
+    </record>
+    <record id="demo_label_group_4" model="shiny_label.label_group">
+      <field name="id">4</field>
+      <field name="name">Rob</field>
+      <field name="sort_order">0</field>
+      <field name="label_ids" eval="[(6, 0, [ref('demo_label_5'), ref('demo_label_6'), ref('demo_label_7'), ref('demo_label_8'), ref('demo_label_9'), ref('demo_label_10'), ref('demo_label_11'), ref('demo_label_12'), ref('demo_label_13'), ref('demo_label_14'), ref('demo_label_15'), ref('demo_label_16'), ref('demo_label_19'), ref('demo_label_20'), ref('demo_label_22'), ref('demo_label_23'), ref('demo_label_24'), ref('demo_label_25')])]"/>
+      <field name="printer_ip">192.168.1.241</field>
+    </record>
+  </data>
+</odoo>
