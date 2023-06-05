@@ -8,17 +8,27 @@
     "author": "Chris Busillo",
     "company": "Shiny Computers",
     "website": "https://www.shinycomputers.com",
-    "depends": ["base"],
+    "depends": [
+        "base",
+        "web",
+    ],
     "data": [
+        "data/default.xml",
         "views/label_menu.xml",
         "views/label_group_views.xml",
         "views/label_views.xml",
+        "views/label_printer_views.xml",
         "security/ir.model.access.csv",
     ],
-    "demo": [
-        "data/demo.xml",
+    "images": [
+        "static/description/icon.png",
     ],
-    "images": ["static/description/icon.png"],
+    "assets": {
+        "web.assets_backend": [
+            "/shiny_label/static/src/js/custom_radio.js",
+            "/shiny_label/static/src/xml/custom_radio.xml",
+        ],
+    },
     "installable": True,
     "application": True,
     "auto_install": False,

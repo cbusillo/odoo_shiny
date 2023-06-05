@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <record id="view_label_group_tree" model="ir.ui.view">
         <field name="name">shiny_label.label_group.tree</field>
@@ -37,5 +36,4 @@
             </form>
         </field>
     </record>
-
 </odoo>

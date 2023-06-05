@@ -30,7 +30,7 @@ def prettify(xml_element):
     return reparsed.toprettyxml(indent="  ")
 
 
-def get_demo_data(module_name, model_names):
+def get_default_data(module_name, model_names):
     common = xmlrpc.client.ServerProxy("{}/xmlrpc/2/common".format(url))
     uid = common.authenticate(db, username, password, {})
 
@@ -49,7 +49,7 @@ def get_demo_data(module_name, model_names):
 
         for item in model_data:
             xml_record = ET.SubElement(xml_data, "record")
-            xml_record.set("id", f"demo_{model_name}_{item['id']}")
+            xml_record.set("id", f"default_{model_name}_{item['id']}")
             xml_record.set("model", module_model_name)
 
             for key, value in item.items():
@@ -70,20 +70,20 @@ def get_demo_data(module_name, model_names):
 
                 if field_type in ["many2one"]:
                     if isinstance(value, (list, tuple)):
-                        xml_field.set("ref", f"demo_{key}_{value[0]}")
+                        xml_field.set("ref", f"default_{key}_{value[0]}")
 
                 elif field_type in ["many2many", "one2many"]:
-                    refs = ", ".join([f"ref('demo_{str(key).replace('_ids','')}_{id_}')" for id_ in value])
+                    refs = ", ".join([f"ref('default_{str(key).replace('_ids','')}_{id_}')" for id_ in value])
                     xml_field.set("eval", f"[(6, 0, [{refs}])]")
                 else:
                     xml_field.text = html.escape(str(value), quote=True)
 
     xml_str = prettify(xml_root)
 
-    with open(base_path / module_name / "data/demo.xml", "w") as f:
+    with open(base_path / module_name / "data/default.xml", "w") as f:
         f.write(xml_str)
 
 
 if __name__ == "__main__":
     for module, models in modules_model_names.items():
-        get_demo_data(module, models)
+        get_default_data(module, models)

@@ -1,0 +1,10 @@
+<t t-name="CustomRadioFieldTemplate" owl="1">
+    <div>
+        <t t-foreach="widget.options" t-as="opt" t-key="opt.id">
+            <input t-ref="radioInput" type="radio" t-att-value="opt.id" t-on-change="_onChangeRadio"/>
+            <label>
+                <t t-esc="opt.display_name"/>
+            </label>
+        </t>
+    </div>
+</t>

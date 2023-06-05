@@ -8,13 +8,11 @@
     "author": "Chris Busillo",
     "company": "Shiny Computers",
     "website": "https://www.shinycomputers.com",
-    "depends": ["base", "product"],
+    "depends": ["base"],
     "data": [
+        "data/default.xml",
         "views/shiny_checklist_views.xml",
         "security/ir.model.access.csv",
-    ],
-    "demo": [
-        "data/demo.xml",
     ],
     "images": ["static/description/icon.png"],
     "installable": True,
