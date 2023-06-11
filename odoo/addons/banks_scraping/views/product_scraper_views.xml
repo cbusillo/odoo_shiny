@@ -1,0 +1,91 @@
+<odoo>
+    <data>
+        <!-- List view: display a list of all scraped products -->
+        <record id="view_product_scraper_tree" model="ir.ui.view">
+            <field name="name">product.scraper.tree</field>
+            <field name="model">product.scraper</field>
+            <field name="arch" type="xml">
+
+                <tree string="Scraped Product">
+                    <field name="name"/>
+                    <field name="sku"/>
+                    <field name="source_url_ids"/>
+                    <field name="display_url"/>
+                    <field name="price"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_product_scraper_form" model="ir.ui.view">
+            <field name="name">product.scraper.form</field>
+            <field name="model">product.scraper</field>
+            <field name="arch" type="xml">
+                <form string="Scraped Product">
+                    <header>
+                        <button name="%(action_product_scraper_wizard)d" string="Start Scraping" type="action"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="sku"/>
+                            <field name="display_url"/>
+                            <field name="price"/>
+                        </group>
+                        <notebook>
+                            <page string="Source URLs">
+                                <field name="source_url_ids" widget="one2many_list">
+                                    <tree string="Source URLs">
+                                        <field name="display_source_url"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+
+        <!-- Action: open the list view -->
+        <record id="action_product_scraper" model="ir.actions.act_window">
+            <field name="name">Product Scraper</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">product.scraper</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+            No records yet.
+                </p>
+            </field>
+        </record>
+
+
+        <!-- Wizard Form view -->
+        <record id="view_product_scraper_wizard_form" model="ir.ui.view">
+            <field name="name">product.scraper.wizard.form</field>
+            <field name="model">product.scraper.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Start Scraping">
+                    <footer>
+                        <button name="action_scrape_website" string="Start Scraping" class="btn-primary" type="object" context="{'immediate_execute': True}"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+
+        <!-- Action to Open Wizard -->
+        <record id="action_product_scraper_wizard" model="ir.actions.act_window">
+            <field name="name">Product Scraper</field>
+            <field name="res_model">product.scraper.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_product_scraper_wizard_form"/>
+            <field name="target">new</field>
+        </record>
+
+        <!-- Menu item: accessible from the main menu -->
+        <menuitem id="menu_product_scraper" name="Scraped Products" action="action_product_scraper"/>
+    </data>
+</odoo>
