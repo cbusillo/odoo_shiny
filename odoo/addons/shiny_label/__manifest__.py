@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=missing-docstring, manifest-required-author, missing-readme
+# pylint: disable=missing-docstring, manifest-required-author, missing-readme,
+# pyright: reportUnusedExpression=false
 {
     "name": "shiny_label",
     "version": "16.0.0.0.1",
@@ -24,10 +25,7 @@
         "static/description/icon.png",
     ],
     "assets": {
-        "web.assets_backend": [
-            "/shiny_label/static/src/js/custom_radio.js",
-            "/shiny_label/static/src/xml/custom_radio.xml",
-        ],
+        "web.assets_backend": [],
     },
     "installable": True,
     "application": True,
