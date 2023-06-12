@@ -51,7 +51,6 @@
                     <field name="name"/>
                     <field name="sku"/>
                     <field name="source_url_count"/>
-                    <field name="source_url_list"/>
                     <field name="url_display"/>
                     <field name="price"/>
                 </tree>
