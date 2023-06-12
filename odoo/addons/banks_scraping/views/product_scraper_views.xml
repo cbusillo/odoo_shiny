@@ -1,5 +1,21 @@
 <odoo>
     <data>
+
+        <!-- Search List View -->
+        <record id="product_scraper_search_view" model="ir.ui.view">
+            <field name="name">product.scraper.search.view</field>
+            <field name="model">product.scraper</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="Custom Model Search">
+                    <field name="name"/>
+                    <field name="brand"/>
+                    <field name="sku"/>
+                </search>
+            </field>
+        </record>
+
+
         <!-- List view: display a list of all scraped products -->
         <record id="view_product_scraper_tree" model="ir.ui.view">
             <field name="name">product.scraper.tree</field>
@@ -7,10 +23,13 @@
             <field name="arch" type="xml">
 
                 <tree string="Scraped Product">
+                    <field name="id"/>
+                    <field name="brand"/>
                     <field name="name"/>
                     <field name="sku"/>
-                    <field name="source_url_ids"/>
-                    <field name="display_url"/>
+                    <field name="source_url_count"/>
+                    <field name="source_url_list"/>
+                    <field name="url_display"/>
                     <field name="price"/>
                 </tree>
             </field>
@@ -27,19 +46,24 @@
                     <sheet>
                         <group>
                             <field name="name"/>
+                            <field name="brand"/>
                             <field name="sku"/>
-                            <field name="display_url"/>
+                            <field name="url_display"/>
+                            <field name="url"/>
                             <field name="price"/>
                         </group>
                         <notebook>
                             <page string="Source URLs">
                                 <field name="source_url_ids" widget="one2many_list">
                                     <tree string="Source URLs">
-                                        <field name="display_source_url"/>
+                                        <field name="source_url_display"/>
+                                        <field name="source_url"/>
                                     </tree>
                                 </field>
                             </page>
                         </notebook>
+                        <field name="source_url_html" widget="html"/>
+
                     </sheet>
                 </form>
             </field>
