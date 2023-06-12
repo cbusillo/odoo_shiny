@@ -37,7 +37,7 @@ class ProductScraper(models.Model):
     source_url_ids = fields.One2many("product.scraper.source", "product_id", string="Source URL Count")
     source_url_count = fields.Integer(compute="_compute_source_url_count", store=True)
     source_url_list = fields.Text(compute="_compute_source_url_list", string="Source URLs List")
-    source_url_html = fields.Html(compute="_compute_source_url_html", string="Source URLs HTML")
+    source_url_html = fields.Text(compute="_compute_source_url_html", string="Source URLs HTML")
     url = fields.Char()
     url_display = fields.Char(compute="_compute_url_display", string="URL")
     sku = fields.Char(required=True, string="SKU")
