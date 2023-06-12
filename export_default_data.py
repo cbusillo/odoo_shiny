@@ -8,7 +8,7 @@ from xml.dom import minidom
 
 base_path = Path(__file__).resolve().parent / "odoo/addons"
 url = "http://localhost:8069"
-db = "oodo_shiny"
+db = "odoo_shiny"
 username = "chris@shinycomputers.com"
 password = os.environ.get("ODOO_API_KEY")
 modules_model_names = {
