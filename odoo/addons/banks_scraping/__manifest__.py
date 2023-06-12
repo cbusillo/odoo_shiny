@@ -11,7 +11,7 @@
     "depends": ["base"],
     "description": "Module to scrape websites for model data.",
     "data": [
-        # "security/ir.model.access.csv",
+        "security/ir.model.access.csv",
         "views/product_scraper_views.xml",
     ],
     "installable": True,
