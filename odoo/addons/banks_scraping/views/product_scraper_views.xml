@@ -73,6 +73,8 @@
                             <field name="url_display"/>
                             <field name="url"/>
                             <field name="price"/>
+                            <field name="source_url_html" widget="copytoclipboard"/>
+
                         </group>
                         <notebook>
                             <page string="Source URLs">
@@ -84,6 +86,7 @@
                                 </field>
                             </page>
                         </notebook>
+
                         <field name="source_url_html" widget="html"/>
 
                     </sheet>
