@@ -109,6 +109,7 @@ class ProductScraper(models.Model):
         options.set_preference("permissions.default.image", 2)
         options.set_preference("dom.ipc.plugins.enabled.libflashplayer.so", "false")
         options.set_preference("service_log_path", "/var/log/odoo/geckodriver.log")
+        options.set_preference("log_path", "/var/log/odoo/geckodriver.log")
 
         options.add_argument("-headless")
         driver = Firefox(options=options)
