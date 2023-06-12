@@ -71,9 +71,9 @@
                             <field name="brand"/>
                             <field name="sku"/>
                             <field name="url_display"/>
-                            <field name="url"/>
+                            <field name="url" widget="url"/>
                             <field name="price"/>
-                            <field name="source_url_html" widget="copytoclipboard"/>
+                            <field name="source_url_html" widget="CopyToClipboard"/>
 
                         </group>
                         <notebook>
