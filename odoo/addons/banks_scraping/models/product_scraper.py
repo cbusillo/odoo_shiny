@@ -276,38 +276,44 @@ class ProductTemplate(models.Model):
         # Retrieve all products from Shopify
         products = shopify.Product.find()
 
-        # Loop over all products
-        for shopify_product in products:
-            # Extract required data
-            product_data = {
-                "name": shopify_product.title,
-                "barcode": shopify_product.variants[0].sku if shopify_product.variants else None,
-                "list_price": float(shopify_product.variants[0].price) if shopify_product.variants else 0.0,
-                "default_code": f"https://{shop_url}.myshopify.com/products/{shopify_product.handle}",
-                # "brand": "Shopify",  # Set a default brand, replace this with real data if available
-            }
+        page = 1
+        products = shopify.Product.find(page=page)
+        while products:
+            # Loop over all products
+            for shopify_product in products:
+                # Extract required data
+                product_data = {
+                    "name": shopify_product.title,
+                    "barcode": shopify_product.variants[0].sku if shopify_product.variants else None,
+                    "list_price": float(shopify_product.variants[0].price) if shopify_product.variants else 0.0,
+                    "default_code": f"https://{shop_url}.myshopify.com/products/{shopify_product.handle}",
+                    # "brand": "Shopify",  # Set a default brand, replace this with real data if available
+                }
 
-            # Get main image and encode it to base64
-            if shopify_product.images:
-                response = requests.get(shopify_product.images[0].src)
-                image_base64 = base64.b64encode(response.content)
-                product_data["image_1920"] = image_base64
+                # Get main image and encode it to base64
+                if shopify_product.images:
+                    response = requests.get(shopify_product.images[0].src)
+                    image_base64 = base64.b64encode(response.content)
+                    product_data["image_1920"] = image_base64
 
-            # Search for existing product
-            product = self.search([("default_code", "=", product_data["default_code"])], limit=1)
+                # Search for existing product
+                product = self.search([("default_code", "=", product_data["default_code"])], limit=1)
 
-            if product:
-                # Update product if it exists
-                product.write(
-                    {
-                        "name": product_data["name"],
-                        "list_price": product_data["list_price"],
-                        "default_code": product_data["default_code"],
-                        "barcode": product_data["barcode"],
-                        "image_1920": product_data["image_1920"],
-                    }
-                )
-            else:
-                # Create product if it does not exist
-                product = self.create(product_data)
-                self.env.cr.commit()  # commit after creating a new product
+                if product:
+                    # Update product if it exists
+                    product.write(
+                        {
+                            "name": product_data["name"],
+                            "list_price": product_data["list_price"],
+                            "default_code": product_data["default_code"],
+                            "barcode": product_data["barcode"],
+                            "image_1920": product_data["image_1920"],
+                        }
+                    )
+                else:
+                    # Create product if it does not exist
+                    product = self.create(product_data)
+                    self.env.cr.commit()  # commit after creating a new product
+
+                page += 1
+                products = shopify.Product.find(page=page)
