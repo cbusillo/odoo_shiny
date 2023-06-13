@@ -324,11 +324,11 @@ class ProductTemplate(models.Model):
 
                     # Search for existing supplier info for this product and partner
                     supplierinfo = self.env["product.supplierinfo"].search(
-                        [("product_tmpl_id", "=", product.id), ("name", "=", partner.id)], limit=1
+                        [("product_tmpl_id", "=", product.id), ("partner_id", "=", partner.id)], limit=1
                     )
                     if not supplierinfo:
                         # Create new supplier info if it doesn't exist
-                        self.env["product.supplierinfo"].create({"name": partner.id, "product_tmpl_id": product.id})
+                        self.env["product.supplierinfo"].create({"partner_id": partner.id, "product_tmpl_id": product.id})
 
             # Go to next page of products
             if products.has_next_page:
