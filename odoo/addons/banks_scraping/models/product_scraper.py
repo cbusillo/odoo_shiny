@@ -281,9 +281,9 @@ class ProductTemplate(models.Model):
                 # Extract required data
                 product_data = {
                     "name": shopify_product.title,
-                    "barcode": shopify_product.variants[0].barcode if shopify_product.variants else None,
+                    "barcode": "",
                     "list_price": float(shopify_product.variants[0].price) if shopify_product.variants else 0.0,
-                    "default_code": shopify_product.variants[0].sku if shopify_product.variants else None,
+                    "default_code": shopify_product.variants[0].barcode if shopify_product.variants else None,
                     "description_sale": shopify_product.body_html,
                     "weight": shopify_product.variants[0].weight if shopify_product.variants else None,
                     # "brand": "Shopify",  # Set a default brand, replace this with real data if available
