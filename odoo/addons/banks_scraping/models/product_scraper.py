@@ -304,6 +304,7 @@ class ProductTemplate(models.Model):
                         "list_price": product_data["list_price"],
                         "default_code": product_data["default_code"],
                         "barcode": product_data["barcode"],
+                        "image_1920": product_data["image_1920"],
                     }
                 )
             else:
