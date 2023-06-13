@@ -5,6 +5,7 @@ import os
 from string import capwords
 import re
 from urllib.parse import urlparse
+import base64
 
 from bs4 import BeautifulSoup
 import requests
@@ -285,6 +286,12 @@ class ProductTemplate(models.Model):
                 "default_code": f"https://{shop_url}.myshopify.com/products/{shopify_product.handle}",
                 # "brand": "Shopify",  # Set a default brand, replace this with real data if available
             }
+
+            # Get main image and encode it to base64
+            if shopify_product.images:
+                response = requests.get(shopify_product.images[0].src)
+                image_base64 = base64.b64encode(response.content)
+                product_data["image_1920"] = image_base64
 
             # Search for existing product
             product = self.search([("default_code", "=", product_data["default_code"])], limit=1)
