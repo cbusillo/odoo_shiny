@@ -299,17 +299,21 @@ class ProductTemplate(models.Model):
                     product_data["image_1920"] = image_base64
 
                 if product:
+                    # Prepare data to update
+                    update_data = {
+                        "name": product_data["name"],
+                        "list_price": product_data["list_price"],
+                        "default_code": product_data["default_code"],
+                        "barcode": product_data["barcode"],
+                        "description_sale": product_data["description_sale"],
+                    }
+
+                    # Only add image data if it exists
+                    if product_data.get("image_1920"):
+                        update_data["image_1920"] = product_data.get("image_1920")
+
                     # Update product if it exists
-                    product.write(
-                        {
-                            "name": product_data["name"],
-                            "list_price": product_data["list_price"],
-                            "default_code": product_data["barcode"],
-                            "barcode": "",
-                            "image_1920": product_data.get("image_1920"),
-                            "description_sale": product_data["description_sale"],
-                        }
-                    )
+                    product.write(update_data)
                 else:
                     # Create product if it does not exist
                     product = self.create(product_data)
