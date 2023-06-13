@@ -109,7 +109,22 @@
                 </p>
             </field>
         </record>
-
+        <record id="view_product_template_form_inherit" model="ir.ui.view">
+            <field name="name">product.template.form.inherit</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_only_form_view"/>
+            <field name="arch" type="xml">
+                <notebook position="inside">
+                    <page string="Related Product Scraper">
+                        <field name="product_scraper_ids" widget="one2many_list">
+                            <tree string="Product Scraper">
+                                <field name="source_url_html" widget="html"/>
+                            </tree>
+                        </field>
+                    </page>
+                </notebook>
+            </field>
+        </record>
 
         <!-- Menu item: accessible from the main menu -->
         <menuitem id="menu_product_scraper" name="Scraped Products" action="action_product_scraper"/>

@@ -259,6 +259,7 @@ class ProductScraper(models.Model):
 
 class ProductTemplate(models.Model):
     _inherit = "product.template"
+    product_scraper_ids = fields.One2many("product.scraper", "sku", string="Related Product Scraper")
 
     @api.model
     def sync_shopify_products(self):
