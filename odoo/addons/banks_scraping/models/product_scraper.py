@@ -306,9 +306,7 @@ class ProductTemplate(models.Model):
                         "barcode": product_data["barcode"],
                     }
                 )
-                print(f"Updated product: {product_data}")
             else:
                 # Create product if it does not exist
                 product = self.create(product_data)
-                print(f"Created new product: {product_data}")
                 self.env.cr.commit()  # commit after creating a new product
