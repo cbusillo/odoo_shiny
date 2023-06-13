@@ -1,5 +1,14 @@
 from odoo import models, fields, api
 
+from string import capwords
+import re
+from urllib.parse import urlparse
+
+from bs4 import BeautifulSoup
+import requests
+from requests.exceptions import RequestException
+from tenacity import retry, stop_after_attempt, wait_fixed
+
 BASE_URL = "https://www.crowleymarine.com"
 
 
@@ -71,9 +80,11 @@ class ProductScraper(models.Model):
             if index == cells_len - 2:
                 return cell.upper()
             elif index == cells_len - 1:
-                return cell.title().replace("-", " ")
+                return capwords(cell).replace("-", " ")
+            elif index == cells_len - 3:
+                return cell.upper()
             else:
-                return cell.title().replace("Oem-Parts", "OEM")
+                return capwords(cell).replace("Oem-parts", "OEM")
 
         headers = ["Brand", "Type", "", "Year", "Model"]  # Replace with your actual headers
         header_row = "<tr>{}</tr>".format("".join(format_header(header) for header in headers))
@@ -95,47 +106,16 @@ class ProductScraper(models.Model):
 
     @api.model
     def scrape_website(self):
-        import re
-        import os
-        import pickle
-        from urllib.parse import urlparse
+        visited_urls = set()
+        visited_end_links = {}
 
-        from selenium.webdriver import Firefox, FirefoxOptions
-        from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
-        from selenium.webdriver.common.by import By
-        from selenium.common.exceptions import WebDriverException, NoSuchElementException
+        @retry(stop=stop_after_attempt(5), wait=wait_fixed(1))
+        def get(url):
+            response = requests.get(url)
+            response.raise_for_status()  # Raises a HTTPError if one occurred
+            return response
 
-        options = FirefoxOptions()
-        options.set_preference("permissions.default.image", 2)
-        options.set_preference("dom.ipc.plugins.enabled.libflashplayer.so", "false")
-        options.set_preference("service_log_path", "/var/log/odoo/geckodriver.log")
-        options.set_preference("log_path", "/var/log/odoo/geckodriver.log")
-
-        options.add_argument("-headless")
-        driver = Firefox(options=options)
-        driver.implicitly_wait(10)
-
-        # Try loading visited_urls and visited_end_links from file
-        try:
-            with open(os.path.expanduser("~/.shiny/visited_urls.pkl"), "rb") as f:
-                visited_urls = pickle.load(f)
-        except FileNotFoundError:
-            visited_urls = set()
-
-        try:
-            with open(os.path.expanduser("~/.shiny/visited_end_links.pkl"), "rb") as f:
-                visited_end_links = pickle.load(f)
-        except FileNotFoundError:
-            visited_end_links = {}
-
-        def get_element_text_if_exists(css_selector):
-            try:
-                element = driver.find_element(By.CSS_SELECTOR, css_selector)
-                return element.text
-            except NoSuchElementException:
-                return None
-
-        def get_links_in_page(url: str, search_regex: str = r"/\d{4}") -> list:
+        def get_links_in_page(url: str, search_regex: str = r"/((19|20)\d{2}|ag|af|ab|aa)") -> list:
             if BASE_URL not in url:
                 url = BASE_URL + url.replace("file://", "")
 
@@ -144,15 +124,19 @@ class ProductScraper(models.Model):
                 return []
 
             print(f"Visiting: {url}")
-            driver.get(url)
+            try:
+                response = get(url)
+            except RequestException as e:
+                print(f"Error during requests to {url} : {str(e)}")
+                return []
+            soup = BeautifulSoup(response.text, "html.parser")
             visited_urls.add(url)
 
-            # Save visited_urls
-            with open(os.path.expanduser("~/.shiny/visited_urls.pkl"), "wb") as f:
-                pickle.dump(visited_urls, f)
-
-            link_elements = driver.find_elements(By.TAG_NAME, "a")
-            links = [link.get_attribute("href") for link in link_elements if link.get_attribute("href")]
+            links = [
+                (BASE_URL + link.get("href")) if link.get("href").startswith("/") else link.get("href")
+                for link in soup.find_all("a")
+                if link.get("href")
+            ]
 
             filtered_links = [link.split("?")[0].split("#")[0] for link in links if re.search(search_regex, link)]
 
@@ -167,110 +151,99 @@ class ProductScraper(models.Model):
         def get_links_in_page_main(url: str) -> list:
             return get_links_in_page(url, r"/oem-parts")
 
-        def update_existing():
-            # Search for all product scraper records
-            products = self.env["product.scraper"].search([])
-
-            # Iterate over each product and update the name
-            for product in products:
-                if not product.name:
+        for main_link in get_links_in_page_main(BASE_URL):
+            if "oem-parts" not in main_link:
+                continue
+            for type_year_link in get_links_in_page_year(main_link):
+                if "outboard" not in type_year_link:
                     continue
-                product.write(
-                    {
-                        "name": product.name.title(),
-                        "brand": "Yamaha",
-                    }
-                )
-            self.env.cr.commit()
+                for motor_link in get_links_in_page_year(type_year_link):
+                    for part_link in get_links_in_page_year(motor_link):
+                        if "/products/" in part_link:
+                            continue
+                        for end_link in get_links_in_page_product(part_link):
+                            brand = capwords(urlparse(end_link).path.split("/")[1])
+                            if end_link in visited_end_links:
+                                product_data = visited_end_links[end_link]
+                                sku = product_data["sku"]
+                            else:
+                                try:
+                                    response = get(end_link)
+                                except RequestException as e:
+                                    print(f"Error during requests to {end_link} : {str(e)}")
+                                    continue
+                                soup = BeautifulSoup(response.text, "html.parser")
 
-        # update_existing()
-        try:
-            for main_link in get_links_in_page_main(BASE_URL):
-                if "oem-parts" not in main_link:
-                    continue
-                for type_year_link in get_links_in_page_year(main_link):
-                    if "outboard" not in type_year_link:
-                        continue
-                    for motor_link in get_links_in_page_year(type_year_link):
-                        for part_link in get_links_in_page_year(motor_link):
-                            if "/products/" in part_link:
-                                continue
-                            for end_link in get_links_in_page_product(part_link):
-                                brand = urlparse(end_link).path.split("/")[1].title()
-                                if end_link in visited_end_links:
-                                    product_data = visited_end_links[end_link]
-                                    sku = product_data["sku"]
-                                else:
-                                    driver.get(end_link)
+                                sku_element = soup.select_one('small[itemprop="sku"], span[data-testid="product:sku"]')
+                                if sku_element:
+                                    sku = sku_element.text.strip()
 
-                                    sku = get_element_text_if_exists('span[itemprop="sku"]') or get_element_text_if_exists(
-                                        'td[data-testid="product:supersession-item-0-sku"]'
-                                    )
-                                    price = get_element_text_if_exists('span[data-testid="product:price"]')
-                                    if price:
-                                        price = price.replace("$", "").replace(",", "")
+                                price_element = soup.select_one('span[itemprop="price"]')
+                                if price_element:
+                                    price = price_element.text.strip()
+
+                                if price:
+                                    price = re.sub(r"[^\d\.]", "", price)
+                                    if price == "":
+                                        price = 0.0
+                                    else:
                                         # Handle price ranges
                                         if "to" in price:
                                             price = [float(p) for p in price.split("to")][0]
                                         else:
                                             price = float(price)
-                                    else:
-                                        price = 0.0
-                                    name = get_element_text_if_exists('span[data-testid="product:name"]')
+                                else:
+                                    price = 0.0
+                                name_element = soup.select_one('span[itemprop="name"]')
+                                name = name_element.text.strip()
 
-                                    if not sku or price is None or not name:
-                                        sku = sku or ".check-me"
-                                    if not name:
-                                        name = ""
+                                if not sku or price is None or not name:
+                                    sku = sku or ".check-me"
+                                if not name:
+                                    name = ""
 
-                                    product_data = {
-                                        "name": name.title(),
-                                        "url": end_link,
-                                        "sku": sku,
-                                        "price": price,
-                                        "brand": brand,
+                                product_data = {
+                                    "name": capwords(name),
+                                    "url": end_link,
+                                    "sku": sku,
+                                    "price": price,
+                                    "brand": brand,
+                                }
+                                print(f"Checking product: {product_data}")
+                                visited_end_links[end_link] = product_data
+
+                            # Search for existing product
+                            product = self.search([("sku", "=", sku), ("brand", "=", brand)], limit=1)
+
+                            if product:
+                                # Update product if it exists
+                                product.write(
+                                    {
+                                        "name": product_data["name"],
+                                        "price": product_data["price"],
                                     }
-                                    print(f"Checking product: {product_data}")
-                                    visited_end_links[end_link] = product_data
-                                    with open(os.path.expanduser("~/.shiny/visited_end_links.pkl"), "wb") as f:
-                                        pickle.dump(visited_end_links, f)
-
-                                # Search for existing product
-                                product = self.search([("sku", "=", sku), ("brand", "=", brand)], limit=1)
-
-                                if product:
-                                    # Update product if it exists
-                                    product.write(
-                                        {
-                                            "name": product_data["name"],
-                                            "price": product_data["price"],
-                                        }
-                                    )
-                                    print(f"Updated product: {product_data}")
-                                else:
-                                    # Create product if it does not exist
-                                    product = self.create(product_data)
-                                    print(f"Created new product: {product_data}")
-                                    self.env.cr.commit()  # commit after creating a new product
-
-                                # Check if source_url already exists for the product
-                                source_exists = self.env["product.scraper.source"].search(
-                                    [("source_url", "=", part_link), ("product_id", "=", product.id)], limit=1
                                 )
+                                print(f"Updated product: {product_data}")
+                            else:
+                                # Create product if it does not exist
+                                product = self.create(product_data)
+                                print(f"Created new product: {product_data}")
+                                self.env.cr.commit()  # commit after creating a new product
 
-                                if not source_exists:
-                                    # Add source_url to product
-                                    source = self.env["product.scraper.source"].create(
-                                        {
-                                            "source_url": part_link,
-                                            "product_id": product.id,
-                                        }
-                                    )
-                                    print(f"Added source URL {part_link} to product {product.name}")
-                                    self.env.cr.commit()  # commit after creating a new source URL
-                                else:
-                                    print(f"Source URL {part_link} already exists for product {product.name}")
-        except WebDriverException as e:
-            print(f"An error occurred while scraping: {str(e)}")
-        finally:
-            driver.quit()
+                            # Check if source_url already exists for the product
+                            source_exists = self.env["product.scraper.source"].search(
+                                [("source_url", "=", part_link), ("product_id", "=", product.id)], limit=1
+                            )
+
+                            if not source_exists:
+                                # Add source_url to product
+                                source = self.env["product.scraper.source"].create(
+                                    {
+                                        "source_url": part_link,
+                                        "product_id": product.id,
+                                    }
+                                )
+                                print(f"Added source URL {part_link} to product {product.name}")
+                                self.env.cr.commit()  # commit after creating a new source URL
+                            else:
+                                print(f"Source URL {part_link} already exists for product {product.name}")
