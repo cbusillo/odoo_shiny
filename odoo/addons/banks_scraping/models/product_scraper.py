@@ -275,9 +275,6 @@ class ProductTemplate(models.Model):
 
         # Retrieve all products from Shopify
         products = shopify.Product.find()
-
-        page = 1
-        products = shopify.Product.find(page=page)
         while products:
             # Loop over all products
             for shopify_product in products:
@@ -314,6 +311,7 @@ class ProductTemplate(models.Model):
                     # Create product if it does not exist
                     product = self.create(product_data)
                     self.env.cr.commit()  # commit after creating a new product
-
-                page += 1
-                products = shopify.Product.find(page=page)
+            if products.has_next_page:
+                products = products.next_page()
+            else
+                products = False
