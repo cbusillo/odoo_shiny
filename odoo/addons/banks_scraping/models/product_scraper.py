@@ -313,5 +313,5 @@ class ProductTemplate(models.Model):
                     self.env.cr.commit()  # commit after creating a new product
             if products.has_next_page:
                 products = products.next_page()
-            else
+            else:
                 products = False
