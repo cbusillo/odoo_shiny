@@ -8,7 +8,7 @@
     "author": "Chris Busillo",
     "company": "Shiny Computers",
     "website": "https://www.shinycomputers.com",
-    "depends": ["base"],
+    "depends": ["base", "product"],
     "description": "Module to scrape websites for model data.",
     "data": [
         "security/ir.model.access.csv",

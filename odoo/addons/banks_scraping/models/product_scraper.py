@@ -1,5 +1,7 @@
 from odoo import models, fields, api
-
+import shopify
+import binascii
+import os
 from string import capwords
 import re
 from urllib.parse import urlparse
@@ -18,6 +20,10 @@ class ProductScraperWizard(models.TransientModel):
 
     def action_scrape_website(self):
         self.env["product.scraper"].scrape_website()
+        return {"type": "ir.actions.act_window_close"}
+
+    def action_sync_shopify_products(self):
+        self.env["product.template"].sync_shopify_products()
         return {"type": "ir.actions.act_window_close"}
 
 
@@ -184,7 +190,7 @@ class ProductScraper(models.Model):
                                     price = price_element.text.strip()
 
                                 if price:
-                                    price = re.sub(r"[^\d\.]", "", price)
+                                    price = re.sub(r"[^\d\.]", "", str(price))
                                     if price == "":
                                         price = 0.0
                                     else:
@@ -196,7 +202,8 @@ class ProductScraper(models.Model):
                                 else:
                                     price = 0.0
                                 name_element = soup.select_one('span[itemprop="name"]')
-                                name = name_element.text.strip()
+                                if name_element:
+                                    name = name_element.text.strip()
                                 if not sku or price is None or not name:
                                     sku = sku or ".check-me"
                                 if not name:
@@ -247,3 +254,54 @@ class ProductScraper(models.Model):
                                 self.env.cr.commit()  # commit after creating a new source URL
                             else:
                                 print(f"Source URL {part_link} already exists for product {product.name}")
+
+
+class ProductTemplate(models.Model):
+    _inherit = "product.template"
+
+    @api.model
+    def sync_shopify_products(self):
+        # Setup Shopify API
+        shop_url = "yps-your-part-supplier"
+        api_version = "2023-01"
+        api_key = os.environ.get("SHOPIFY_API_KEY")
+        password = os.environ.get("SHOPIFY_API_SECRET_KEY")
+        token = os.environ.get("SHOPIFY_API_TOKEN")
+
+        shopify.Session.setup(api_key=api_key, secret=token)
+
+        shopify.ShopifyResource.set_site(f"https://{api_key}:{token}@{shop_url}.myshopify.com/admin")
+
+        # Retrieve all products from Shopify
+        products = shopify.Product.find()
+
+        # Loop over all products
+        for shopify_product in products:
+            # Extract required data
+            product_data = {
+                "name": shopify_product.title,
+                "barcode": shopify_product.variants[0].sku if shopify_product.variants else None,
+                "list_price": float(shopify_product.variants[0].price) if shopify_product.variants else 0.0,
+                "default_code": f"https://{shop_url}.myshopify.com/products/{shopify_product.handle}",
+                # "brand": "Shopify",  # Set a default brand, replace this with real data if available
+            }
+
+            # Search for existing product
+            product = self.search([("default_code", "=", product_data["default_code"])], limit=1)
+
+            if product:
+                # Update product if it exists
+                product.write(
+                    {
+                        "name": product_data["name"],
+                        "list_price": product_data["list_price"],
+                        "default_code": product_data["default_code"],
+                        "barcode": product_data["barcode"],
+                    }
+                )
+                print(f"Updated product: {product_data}")
+            else:
+                # Create product if it does not exist
+                product = self.create(product_data)
+                print(f"Created new product: {product_data}")
+                self.env.cr.commit()  # commit after creating a new product
