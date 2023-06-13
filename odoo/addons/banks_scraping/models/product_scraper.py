@@ -112,7 +112,8 @@ class ProductScraper(models.Model):
         @retry(stop=stop_after_attempt(5), wait=wait_fixed(1))
         def get(url):
             response = requests.get(url)
-            response.raise_for_status()  # Raises a HTTPError if one occurred
+            if response.status_code != 404:  # Only raise if status code is not 404
+                response.raise_for_status()  # Raises a HTTPError if one occurred
             return response
 
         def get_links_in_page(url: str, search_regex: str = r"/((19|20)\d{2}|ag|af|ab|aa)") -> list:
@@ -126,7 +127,7 @@ class ProductScraper(models.Model):
             print(f"Visiting: {url}")
             try:
                 response = get(url)
-            except RequestException as e:
+            except requests.exceptions.HTTPError as e:
                 print(f"Error during requests to {url} : {str(e)}")
                 return []
             soup = BeautifulSoup(response.text, "html.parser")
@@ -169,7 +170,7 @@ class ProductScraper(models.Model):
                             else:
                                 try:
                                     response = get(end_link)
-                                except RequestException as e:
+                                except requests.exceptions.HTTPError as e:
                                     print(f"Error during requests to {end_link} : {str(e)}")
                                     continue
                                 soup = BeautifulSoup(response.text, "html.parser")
@@ -196,7 +197,6 @@ class ProductScraper(models.Model):
                                     price = 0.0
                                 name_element = soup.select_one('span[itemprop="name"]')
                                 name = name_element.text.strip()
-
                                 if not sku or price is None or not name:
                                     sku = sku or ".check-me"
                                 if not name:
