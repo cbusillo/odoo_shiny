@@ -281,20 +281,22 @@ class ProductTemplate(models.Model):
                 # Extract required data
                 product_data = {
                     "name": shopify_product.title,
-                    "barcode": shopify_product.variants[0].sku if shopify_product.variants else None,
+                    "barcode": shopify_product.variants[0].barcode if shopify_product.variants else None,
                     "list_price": float(shopify_product.variants[0].price) if shopify_product.variants else 0.0,
-                    "default_code": f"https://{shop_url}.myshopify.com/products/{shopify_product.handle}",
+                    "default_code": shopify_product.variants[0].sku if shopify_product.variants else None,
+                    "description_sale": shopify_product.body_html,
+                    "weight": shopify_product.variants[0].weight if shopify_product.variants else None,
                     # "brand": "Shopify",  # Set a default brand, replace this with real data if available
                 }
 
+                # Search for existing product
+                product = self.search([("name", "=", product_data["name"])], limit=1)
+
                 # Get main image and encode it to base64
-                if shopify_product.images:
+                if shopify_product.images and (not product or not product.image_1920):
                     response = requests.get(shopify_product.images[0].src)
                     image_base64 = base64.b64encode(response.content)
                     product_data["image_1920"] = image_base64
-
-                # Search for existing product
-                product = self.search([("default_code", "=", product_data["default_code"])], limit=1)
 
                 if product:
                     # Update product if it exists
@@ -304,13 +306,35 @@ class ProductTemplate(models.Model):
                             "list_price": product_data["list_price"],
                             "default_code": product_data["default_code"],
                             "barcode": product_data["barcode"],
-                            "image_1920": product_data["image_1920"],
+                            "image_1920": product_data.get("image_1920"),
+                            "description_sale": product_data["description_sale"],
                         }
                     )
                 else:
                     # Create product if it does not exist
                     product = self.create(product_data)
-                    self.env.cr.commit()  # commit after creating a new product
+
+                # Update vendor/supplier info
+                if shopify_product.vendor:
+                    # Search for existing partner with the same name as the vendor
+                    partner = self.env["res.partner"].search([("name", "=", shopify_product.vendor)], limit=1)
+                    if not partner:
+                        # Create a new partner if it doesn't exist
+                        partner = self.env["res.partner"].create({"name": shopify_product.vendor})
+
+                    # Search for existing supplier info for this product and partner
+                    supplierinfo = self.env["product.supplierinfo"].search(
+                        [("product_tmpl_id", "=", product.id), ("name", "=", partner.id)], limit=1
+                    )
+                    if not supplierinfo:
+                        # Create new supplier info if it doesn't exist
+                        self.env["product.supplierinfo"].create({"name": partner.id, "product_tmpl_id": product.id})
+
+            # Go to next page of products
+            if products.has_next_page:
+                products = products.next_page()
+                self.env.cr.commit()  # commit after creating a new product
+
             if products.has_next_page:
                 products = products.next_page()
             else:
