@@ -304,8 +304,8 @@ class ProductTemplate(models.Model):
                         {
                             "name": product_data["name"],
                             "list_price": product_data["list_price"],
-                            "default_code": product_data["default_code"],
-                            "barcode": product_data["barcode"],
+                            "default_code": product_data["barcode"],
+                            "barcode": "",
                             "image_1920": product_data.get("image_1920"),
                             "description_sale": product_data["description_sale"],
                         }
