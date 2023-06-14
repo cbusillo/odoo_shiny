@@ -15,6 +15,16 @@ from tenacity import retry, stop_after_attempt, wait_fixed
 BASE_URL = "https://www.crowleymarine.com"
 
 
+class ProductScraperURLState(models.Model):
+    _name = "product.scraper.url.state"
+    _description = "URL Scraping State"
+
+    url = fields.Char(string="URL", required=True)
+    scraped = fields.Boolean(string="Scraped", default=False)
+
+    _sql_constraints = [("url_unique", "UNIQUE(url)", "The URL must be unique!")]
+
+
 class ProductScraperWizard(models.TransientModel):
     _name = "product.scraper.wizard"
     _description = "Product Scraper Wizard"
@@ -166,6 +176,10 @@ class ProductScraper(models.Model):
                 if "outboard" not in type_year_link:
                     continue
                 for motor_link in get_links_in_page_year(type_year_link):
+                    url_state = self.env["product.scraper.url.state"].search([("url", "=", motor_link)], limit=1)
+                    if url_state and url_state.scraped:
+                        print(f"Link {motor_link} already scraped, skipping...")
+                        continue
                     for part_link in get_links_in_page_year(motor_link):
                         if "/products/" in part_link:
                             continue
@@ -255,6 +269,12 @@ class ProductScraper(models.Model):
                                 self.env.cr.commit()  # commit after creating a new source URL
                             else:
                                 print(f"Source URL {part_link} already exists for product {product.name}")
+
+                    if not url_state:
+                        # if the URL wasn't previously in the database, create a new record
+                        url_state = self.env["product.scraper.url.state"].create({"url": motor_link})
+                    url_state.write({"scraped": True})
+                    self.env.cr.commit()  #
 
 
 class ProductTemplate(models.Model):
