@@ -19,8 +19,8 @@ class ProductScraperURLState(models.Model):
     _name = "product.scraper.url.state"
     _description = "URL Scraping State"
 
-    url = fields.Char(string="URL", required=True)
-    scraped = fields.Boolean(string="Scraped", default=False)
+    url = fields.Char(string="URL", required=True, index=True)
+    scraped = fields.Boolean(string="Scraped", default=False, index=True)
 
     _sql_constraints = [("url_unique", "UNIQUE(url)", "The URL must be unique!")]
 
@@ -42,9 +42,9 @@ class ProductScraperSource(models.Model):
     _name = "product.scraper.source"
     _description = "Product Scraper Source URL"
 
-    source_url = fields.Char()
-    source_url_display = fields.Char(compute="_compute_source_url_display")
-    product_id = fields.Many2one("product.scraper", string="Related Product")
+    source_url = fields.Char(index=True, string="Source URL")
+    source_url_display = fields.Char(compute="_compute_source_url_display", store=True, index=True)
+    product_id = fields.Many2one("product.scraper", string="Related Product", index=True)
 
     _sql_constraints = [("product_source_unique", "UNIQUE(source_url, product_id)", "The Source URL must be unique per product!")]
 
@@ -64,11 +64,11 @@ class ProductScraper(models.Model):
     source_url_count = fields.Integer(compute="_compute_source_url_count", store=True)
     source_url_list = fields.Text(compute="_compute_source_url_list", string="Source URLs List")
     source_url_html = fields.Text(compute="_compute_source_url_html", string="Source URLs HTML")
-    url = fields.Char(string="URL")
+    url = fields.Char(string="URL", index=True)
     url_display = fields.Char(compute="_compute_url_display", string="Path")
-    sku = fields.Char(required=True, string="SKU")
-    price = fields.Float()
-    brand = fields.Char()
+    sku = fields.Char(required=True, string="SKU", index=True)
+    price = fields.Float(index=True)
+    brand = fields.Char(index=True)
 
     _sql_constraints = [("brand_sku_unique", "UNIQUE(brand, sku)", "The Brand and SKU must be unique!")]
 
@@ -259,7 +259,7 @@ class ProductScraper(models.Model):
 
                             if not source_exists:
                                 # Add source_url to product
-                                source = self.env["product.scraper.source"].create(
+                                self.env["product.scraper.source"].create(
                                     {
                                         "source_url": part_link,
                                         "product_id": product.id,
