@@ -1,16 +1,16 @@
-from odoo import models, fields, api
-import shopify
-import binascii
-import os
-from string import capwords
-import re
-from urllib.parse import urlparse
 import base64
+import logging
+import os
+import re
+from string import capwords
+from urllib.parse import urlparse
 
-from bs4 import BeautifulSoup
 import requests
-from requests.exceptions import RequestException
+import shopify
+from bs4 import BeautifulSoup
 from tenacity import retry, stop_after_attempt, wait_fixed
+
+from odoo import api, fields, models
 
 BASE_URL = "https://www.crowleymarine.com"
 
@@ -20,7 +20,7 @@ class ProductScraperURLState(models.Model):
     _description = "URL Scraping State"
 
     url = fields.Char(string="URL", required=True, index=True)
-    scraped = fields.Boolean(string="Scraped", default=False, index=True)
+    scraped = fields.Boolean(default=False, index=True)
 
     _sql_constraints = [("url_unique", "UNIQUE(url)", "The URL must be unique!")]
 
@@ -91,7 +91,7 @@ class ProductScraper(models.Model):
     @api.depends("source_url_ids")
     def _compute_source_url_html(self):
         def format_header(header):
-            return "<th style='border:1px solid black; padding:10px;'>{}</th>".format(header)
+            return f"<th style='border:1px solid black; padding:10px;'>{header}</th>"
 
         def format_cell(index, cell, cells_len):
             if index == cells_len - 2:
@@ -104,7 +104,7 @@ class ProductScraper(models.Model):
                 return capwords(cell).replace("Oem-parts", "OEM")
 
         headers = ["Brand", "Type", "", "Year", "Model"]  # Replace with your actual headers
-        header_row = "<tr>{}</tr>".format("".join(format_header(header) for header in headers))
+        header_row = f"<tr>{''.join(format_header(header) for header in headers)}</tr>"
 
         for record in self:
             urls = (url.source_url_display for url in record.source_url_ids)
@@ -114,12 +114,12 @@ class ProductScraper(models.Model):
                 cells = url.split("/")[1:]  # Skip the first cell if it's blank
                 formatted_cells = [format_cell(index, cell, len(cells)) for index, cell in enumerate(cells)]
                 table_rows.append(
-                    "<tr>{}</tr>".format(
-                        "".join("<td style='border:1px solid black; padding:10px;'>{}</td>".format(cell) for cell in formatted_cells)
-                    )
-                )
+                    "<tr>"
+                    + "".join(f"<td style='border:1px solid black; padding:10px;'>{cell}</td>" for cell in formatted_cells)
+                    + "</tr>"
+                )  # pylint: disable=consider-using-f-string
 
-            record.source_url_html = "<table style='border:1px solid black'>{}</table>".format(header_row + "".join(table_rows))
+            record.source_url_html = f"<table style='border:1px solid black'>{header_row + ''.join(table_rows)}</table>"
 
     @api.model
     def scrape_website(self):
@@ -128,24 +128,26 @@ class ProductScraper(models.Model):
 
         @retry(stop=stop_after_attempt(5), wait=wait_fixed(1))
         def get(url):
-            response = requests.get(url)
+            response = requests.get(url, timeout=10)
             if response.status_code != 404:  # Only raise if status code is not 404
                 response.raise_for_status()  # Raises a HTTPError if one occurred
             return response
+
+        logger = logging.getLogger(__name__)
 
         def get_links_in_page(url: str, search_regex: str = r"/((19|20)\d{2}|ag|af|ab|aa)") -> list:
             if BASE_URL not in url:
                 url = BASE_URL + url.replace("file://", "")
 
             if url in visited_urls and url != BASE_URL:
-                print(f"Already visited: {url}")
+                logger.info("Already visited: %s", url)
                 return []
 
-            print(f"Visiting: {url}")
+            logger.info("Visiting: %s", url)
             try:
                 response = get(url)
-            except requests.exceptions.HTTPError as e:
-                print(f"Error during requests to {url} : {str(e)}")
+            except requests.exceptions.HTTPError as error:
+                logger.error("Error during requests to %s : %s", url, str(error))
                 return []
             soup = BeautifulSoup(response.text, "html.parser")
             visited_urls.add(url)
@@ -178,7 +180,7 @@ class ProductScraper(models.Model):
                 for motor_link in get_links_in_page_year(type_year_link):
                     url_state = self.env["product.scraper.url.state"].search([("url", "=", motor_link)], limit=1)
                     if url_state and url_state.scraped:
-                        print(f"Link {motor_link} already scraped, skipping...")
+                        logger.info("Link %s already scraped, skipping...", motor_link)
                         continue
                     for part_link in get_links_in_page_year(motor_link):
                         if "/products/" in part_link:
@@ -191,8 +193,8 @@ class ProductScraper(models.Model):
                             else:
                                 try:
                                     response = get(end_link)
-                                except requests.exceptions.HTTPError as e:
-                                    print(f"Error during requests to {end_link} : {str(e)}")
+                                except requests.exceptions.HTTPError as error:
+                                    logger.error("Error during requests to %s : %s", end_link, str(error))
                                     continue
                                 soup = BeautifulSoup(response.text, "html.parser")
 
@@ -231,7 +233,7 @@ class ProductScraper(models.Model):
                                     "price": price,
                                     "brand": brand,
                                 }
-                                print(f"Checking product: {product_data}")
+                                logger.info("Checking product: %s", product_data)
                                 visited_end_links[end_link] = product_data
 
                             # Search for existing product
@@ -245,11 +247,11 @@ class ProductScraper(models.Model):
                                         "price": product_data["price"],
                                     }
                                 )
-                                print(f"Updated product: {product_data}")
+                                logger.info("Updated product: %s", product_data)
                             else:
                                 # Create product if it does not exist
                                 product = self.create(product_data)
-                                print(f"Created new product: {product_data}")
+                                logger.info("Created new product: %s", product_data)
                                 self.env.cr.commit()  # commit after creating a new product
 
                             # Check if source_url already exists for the product
@@ -265,10 +267,10 @@ class ProductScraper(models.Model):
                                         "product_id": product.id,
                                     }
                                 )
-                                print(f"Added source URL {part_link} to product {product.name}")
+                                logger.info("Added source URL %s to product %s", part_link, product.name)
                                 self.env.cr.commit()  # commit after creating a new source URL
                             else:
-                                print(f"Source URL {part_link} already exists for product {product.name}")
+                                logger.info("Source URL %s already exists for product %s", part_link, product.name)
 
                     if not url_state:
                         # if the URL wasn't previously in the database, create a new record
@@ -285,9 +287,7 @@ class ProductTemplate(models.Model):
     def sync_shopify_products(self):
         # Setup Shopify API
         shop_url = "yps-your-part-supplier"
-        api_version = "2023-01"
         api_key = os.environ.get("SHOPIFY_API_KEY")
-        password = os.environ.get("SHOPIFY_API_SECRET_KEY")
         token = os.environ.get("SHOPIFY_API_TOKEN")
 
         shopify.Session.setup(api_key=api_key, secret=token)
@@ -315,7 +315,7 @@ class ProductTemplate(models.Model):
 
                 # Get main image and encode it to base64
                 if shopify_product.images and (not product or not product.image_1920):
-                    response = requests.get(shopify_product.images[0].src)
+                    response = requests.get(shopify_product.images[0].src, timeout=10)
                     image_base64 = base64.b64encode(response.content)
                     product_data["image_1920"] = image_base64
 
