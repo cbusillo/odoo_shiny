@@ -172,10 +172,10 @@ class ProductScraper(models.Model):
             return get_links_in_page(url, r"/oem-parts")
 
         for main_link in get_links_in_page_main(BASE_URL):
-            if "oem-parts" not in main_link:
+            if "oem-parts" not in main_link or "mercury" in main_link:
                 continue
             for type_year_link in get_links_in_page_year(main_link):
-                if "outboard" not in type_year_link:
+                if "outboard" not in type_year_link and "international" not in type_year_link:
                     continue
                 for motor_link in get_links_in_page_year(type_year_link):
                     url_state = self.env["product.scraper.url.state"].search([("url", "=", motor_link)], limit=1)
