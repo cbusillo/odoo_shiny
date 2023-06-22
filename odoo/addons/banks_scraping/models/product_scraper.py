@@ -69,6 +69,7 @@ class ProductScraper(models.Model):
     sku = fields.Char(required=True, string="SKU", index=True)
     price = fields.Float(index=True)
     brand = fields.Char(index=True)
+    product_template_ids = fields.One2many("product.template", "product_scraper_id", string="Related Products")
 
     _sql_constraints = [("brand_sku_unique", "UNIQUE(brand, sku)", "The Brand and SKU must be unique!")]
 
@@ -281,7 +282,19 @@ class ProductScraper(models.Model):
 
 class ProductTemplate(models.Model):
     _inherit = "product.template"
-    product_scraper_ids = fields.One2many("product.scraper", "sku", string="Related Product Scraper")
+
+    product_scraper_id = fields.Many2one(
+        "product.scraper", compute="_compute_product_scraper_id", store=True, readonly=False, string="Product Scraper"
+    )
+    product_scraper_html = fields.Text(related="product_scraper_id.source_url_html", string="Product Scraper HTML", readonly=True)
+
+    @api.depends("default_code")
+    def _compute_product_scraper_id(self):
+        for record in self:
+            sku = (record.default_code or "").split(" ")[0]
+            if sku:
+                product_scraper = self.env["product.scraper"].search([("sku", "=", sku)], limit=1)
+                record.product_scraper_id = product_scraper
 
     @api.model
     def sync_shopify_products(self):
@@ -327,6 +340,7 @@ class ProductTemplate(models.Model):
                         "default_code": product_data["default_code"],
                         "barcode": product_data["barcode"],
                         "description_sale": product_data["description_sale"],
+                        "weight": product_data["weight"],
                     }
 
                     # Only add image data if it exists

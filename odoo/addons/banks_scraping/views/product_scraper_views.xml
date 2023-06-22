@@ -68,12 +68,18 @@
                     </header>
                     <sheet>
                         <group>
+
                             <field name="name"/>
                             <field name="brand"/>
                             <field name="sku"/>
                             <field name="url_display"/>
                             <field name="url" widget="url"/>
                             <field name="price"/>
+                            <field name="product_template_ids">
+                                <tree string="Related Product">
+                                    <field name="name"/>
+                                </tree>
+                            </field>
                             <field name="source_url_html" widget="CopyToClipboard"/>
 
                         </group>
@@ -116,11 +122,8 @@
             <field name="arch" type="xml">
                 <notebook position="inside">
                     <page string="Related Product Scraper">
-                        <field name="product_scraper_ids" widget="one2many_list">
-                            <tree string="Product Scraper">
-                                <field name="source_url_html" widget="html"/>
-                            </tree>
-                        </field>
+                        <field name="product_scraper_id" />
+                        <field name="product_scraper_html" />
                     </page>
                 </notebook>
             </field>
