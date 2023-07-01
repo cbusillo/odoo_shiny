@@ -1,1 +1,1 @@
-from . import product_scraper
+from . import product_scraper, product_template
