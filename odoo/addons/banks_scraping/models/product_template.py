@@ -62,28 +62,14 @@ class ProductTemplate(models.Model):
                 product = self.search([("name", "=", product_data["name"])], limit=1)
 
                 # Get main image and encode it to base64
-                if shopify_product.images and (not product or not product.image_1920):
+                if shopify_product.images and (not product or not isinstance(getattr(product, "image_1920", None), bytes)):
                     response = requests.get(shopify_product.images[0].src, timeout=10)
                     image_base64 = base64.b64encode(response.content)
                     product_data["image_1920"] = image_base64
 
                 if product:
-                    # Prepare data to update
-                    update_data = {
-                        "name": product_data["name"],
-                        "list_price": product_data["list_price"],
-                        "default_code": product_data["default_code"],
-                        "barcode": product_data["barcode"],
-                        "description_sale": product_data["description_sale"],
-                        "weight": product_data["weight"],
-                    }
-
-                    # Only add image data if it exists
-                    if product_data.get("image_1920"):
-                        update_data["image_1920"] = product_data.get("image_1920")
-
                     # Update product if it exists
-                    product.write(update_data)
+                    product.write(product_data)
                 else:
                     # Create product if it does not exist
                     product = self.create(product_data)
