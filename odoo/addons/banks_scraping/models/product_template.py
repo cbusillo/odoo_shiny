@@ -12,6 +12,7 @@ from odoo import api, fields, models
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
+    bin = fields.Char()
     product_scraper_id = fields.Many2one(
         "product.scraper", compute="_compute_product_scraper_id", store=True, readonly=False, string="Product Scraper"
     )
@@ -62,7 +63,8 @@ class ProductTemplate(models.Model):
                 product = self.search([("name", "=", product_data["name"])], limit=1)
 
                 # Get main image and encode it to base64
-                if shopify_product.images and (not product or not isinstance(getattr(product, "image_1920", None), bytes)):
+                image_1920 = getattr(product, "image_1920", None)
+                if shopify_product.images and (not product or not isinstance(image_1920, bytes)):
                     response = requests.get(shopify_product.images[0].src, timeout=10)
                     image_base64 = base64.b64encode(response.content)
                     product_data["image_1920"] = image_base64

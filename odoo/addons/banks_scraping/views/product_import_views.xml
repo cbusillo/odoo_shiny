@@ -1,0 +1,47 @@
+<odoo>
+    <!-- Product Import: Action -->
+    <record id= "action_product_import" model="ir.actions.act_window">
+        <field name="name">Product Import</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">product.import</field>
+        <field name="view_mode">tree</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+            No records yet.
+            </p>
+        </field>
+    </record>
+
+    <!-- Product Import: List View -->
+    <record id="view_product_import_tree" model="ir.ui.view">
+        <field name="name">product.import.tree</field>
+        <field name="model">product.import</field>
+        <field name="arch" type="xml">
+            <tree string="Product Import" editable="bottom">
+                <field name="sku"/>
+                <field name="mpn"/>
+                <field name="manufacturer"/>
+                <field name="quantity"/>
+                <field name="bin"/>
+                <field name="title" widget="fieldtext" width="400px"/>
+                <field name="description"/>
+                <field name="type"/>
+                <field name="weight"/>
+                <field name="price"/>
+                <field name="cost"/>
+                <field name="pic_1_url"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Product Import: Sequence -->
+    <record id="sequence_product_import" model="ir.sequence">
+        <field name="name">Product Import</field>
+        <field name="code">product.import</field>
+        <field name="prefix"></field>
+        <field name="padding">6</field>
+        <field name="number_next">8000</field>
+    </record>
+    <menuitem id="menu_product_import" name="Imported Products" action="action_product_import"/>
+</odoo>
+

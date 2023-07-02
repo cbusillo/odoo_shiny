@@ -2,3 +2,7 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_product_scraper,access_product_scraper,model_product_scraper,base.group_user,1,1,1,1
 access_product_scraper_wizard,access_product_scraper_wizard,model_product_scraper_wizard,base.group_user,1,1,1,1
 access_product_scraper_source,access_product_scraper_source,model_product_scraper_source,base.group_user,1,1,1,1
+access_product_import,access.product.import,model_product_import,base.group_user,1,1,1,1
+access_product_scraper_url_state,model_product_scraper_url_state,model_product_scraper_url_state,base.group_user,1,1,1,1
+access_product_type,model_product_type,model_product_type,base.group_user,1,1,1,1
+access_product_manufacturer,model_product_manufacturer,model_product_manufacturer,base.group_user,1,1,1,1

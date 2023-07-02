@@ -3,16 +3,19 @@
 # pyright: reportUnusedExpression=false
 {
     "name": "Scraping Module",
-    "version": "1.0",
+    "version": "16.0.1.0",
     "category": "Industries",
     "author": "Chris Busillo",
     "company": "Shiny Computers",
     "website": "https://www.shinycomputers.com",
     "depends": ["base", "product"],
-    "description": "Module to scrape websites for model data.",
+    "description": "Module to scrape websites for model data.",  # pylint: disable=manifest-deprecated-key
     "data": [
         "security/ir.model.access.csv",
         "views/product_scraper_views.xml",
+        "views/product_template_views.xml",
+        "views/product_import_views.xml",
+        "views/product_template_wizard.xml",
     ],
     "installable": True,
     "application": True,
