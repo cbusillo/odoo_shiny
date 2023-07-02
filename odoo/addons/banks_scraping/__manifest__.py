@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=missing-docstring, manifest-required-author, missing-readme,
+# pylint: disable=missing-docstring, manifest-required-author, missing-readme, manifest-deprecated-key, manifest-version-format
 # pyright: reportUnusedExpression=false
 {
     "name": "Scraping Module",
@@ -9,7 +9,7 @@
     "company": "Shiny Computers",
     "website": "https://www.shinycomputers.com",
     "depends": ["base", "product"],
-    "description": "Module to scrape websites for model data.",  # pylint: disable=manifest-deprecated-key
+    "description": "Module to scrape websites for model data.",
     "data": [
         "security/ir.model.access.csv",
         "views/product_scraper_views.xml",
