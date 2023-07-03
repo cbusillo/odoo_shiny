@@ -1,6 +1,6 @@
 import base64
 import os
-import time
+import re
 
 import requests
 import shopify
@@ -49,13 +49,18 @@ class ProductProduct(models.Model):
                     continue
 
                 shopify_product_variant = shopify_product.variants[0]
-                shopify_product_inventory = shopify.InventoryItem.find(shopify_product_variant.inventory_item_id)
+                # shopify_product_inventory = shopify.InventoryItem.find(shopify_product_variant.inventory_item_id)
+                shopify_cost = 0.0  # shopify_cost = float(shopify_product_inventory.cost or 0.0)
+                # if hasattr(shopify_product_inventory, "cost") else 0.0
                 # Extract required data
                 shopify_sku_bin = (shopify_product.variants[0].sku or "").split("-")
                 shopify_sku = shopify_sku_bin[0].strip()
 
                 shopify_bin = shopify_sku_bin[1].strip() if len(shopify_sku_bin) > 1 else None
                 shopify_mpn = shopify_product_variant.barcode
+
+                if not re.match(r"^\d{4,8}$", shopify_sku):
+                    continue
 
                 if shopify_product.vendor:
                     manufacturer = self.env["product.manufacturer"].search([("name", "=", shopify_product.vendor)], limit=1)
@@ -66,9 +71,7 @@ class ProductProduct(models.Model):
                     "name": shopify_product.title,
                     "barcode": "",
                     "list_price": float(shopify_product_variant.price),
-                    "standard_price": float(
-                        shopify_product_inventory.cost or 0 if hasattr(shopify_product_inventory, "cost") else 0
-                    ),
+                    "standard_price": shopify_cost,
                     "mpn": shopify_mpn,
                     "default_code": shopify_sku,
                     "bin": shopify_bin,
@@ -91,26 +94,27 @@ class ProductProduct(models.Model):
 
                 odoo_product_template = self.env["product.template"].search([("id", "=", odoo_product.product_tmpl_id.id)], limit=1)
 
-                for shopify_image in shopify_product.images:
-                    response = requests.get(shopify_image.src, timeout=10)
-                    image_base64 = base64.b64encode(response.content)
-                    self.env["product.images.extension"].create(
-                        {
-                            "product_id": odoo_product_template.id,
-                            "image_1920": image_base64,
-                        }
-                    )
+                if odoo_product_template.image_1920 is False or odoo_product_template.image_1920 is None:
+                    for index, shopify_image in enumerate(shopify_product.images):
+                        response = requests.get(shopify_image.src, timeout=10)
+                        image_base64 = base64.b64encode(response.content)
+                        if index == 0:
+                            odoo_product_template.image_1920 = image_base64
+                        self.env["product.images.extension"].create(
+                            {
+                                "product_id": odoo_product_template.id,
+                                "image_1920": image_base64,
+                            }
+                        )
 
                 if shopify_product.variants[0].inventory_quantity:
                     odoo_product.update_quantity(shopify_product.variants[0].inventory_quantity)
 
-                time.sleep(0.5)  # Pause for 500ms
+                # time.sleep(0.5)  # Pause for 500ms
             # Go to next page of products
-            if shopify_products.has_next_page:
-                shopify_products = shopify_products.next_page()
-                self.env.cr.commit()  # pylint: disable=invalid-commit
-
             if shopify_products.has_next_page:
                 shopify_products = shopify_products.next_page()
             else:
                 shopify_products = False
+
+            self.env.cr.commit()  # pylint: disable=invalid-commit

@@ -36,6 +36,16 @@ class ProductImport(models.Model):
     cost = fields.Float()
     pic_1_url = fields.Char()
     pic_1_bytes = fields.Image(max_width=1920, max_height=1920)
+    condition = fields.Selection(
+        [
+            ("used", "Used"),
+            ("new", "New"),
+            ("open_box", "Open Box"),
+            ("broken", "Broken"),
+            ("refurbished", "Refurbished"),
+        ],
+        default="used",
+    )
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -68,13 +78,12 @@ class ProductImport(models.Model):
 
     def open_record(self):
         self.ensure_one()
-        return { # pylint: disable=no-member
+        return {  # pylint: disable=no-member
             "type": "ir.actions.act_window",
             "res_model": "product.import",
             "view_mode": "form",
             "res_id": self.id,
         }
-
 
     def get_image_from_url(self, url: str) -> bytes | None:
         if not url:
@@ -110,6 +119,7 @@ class ProductImport(models.Model):
                 "detailed_type": "product",
                 "is_published": True,
                 "image_1920": self.get_image_from_url(record.pic_1_url),
+                "condition": record.condition,
             }
             product = self.env["product.product"].search([("default_code", "=", record.sku)], limit=1)
             if product:

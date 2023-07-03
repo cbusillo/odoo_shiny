@@ -31,6 +31,7 @@
         <field name="arch" type="xml">
             <tree string="Product Import" editable="bottom">
                 <field name="sku"/>
+                <field name="condition"/>
                 <field name="mpn"/>
                 <field name="manufacturer"/>
                 <field name="quantity"/>
@@ -57,6 +58,7 @@
                 <sheet>
                     <group>
                         <field name="sku"/>
+                        <field name="condition"/>
                         <field name="mpn"/>
                         <field name="manufacturer"/>
                         <field name="quantity"/>

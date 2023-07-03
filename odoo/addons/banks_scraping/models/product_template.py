@@ -1,4 +1,6 @@
-from odoo import models, fields, api
+import re
+from odoo import models, fields, api, _
+from odoo.exceptions import ValidationError
 
 
 class ProductTemplate(models.Model):
@@ -9,6 +11,17 @@ class ProductTemplate(models.Model):
     manufacturer = fields.Many2one("product.manufacturer", index=True)
     part_type = fields.Many2one("product.type", index=True)
     product_images = fields.One2many("product.images.extension", "product_id")
+    default_code = fields.Char("SKU", index=True, required=False)
+    condition = fields.Selection(
+        [
+            ("used", "Used"),
+            ("new", "New"),
+            ("open_box", "Open Box"),
+            ("broken", "Broken"),
+            ("refurbished", "Refurbished"),
+        ],
+        default="used",
+    )
 
     product_scraper_id = fields.Many2one(
         "product.scraper", compute="_compute_product_scraper_id", store=True, readonly=False, string="Product Scraper"
@@ -28,3 +41,9 @@ class ProductTemplate(models.Model):
             if sku:
                 product_scraper = self.env["product.scraper"].search([("sku", "=", sku)], limit=1)
                 record.product_scraper_id = product_scraper
+
+    @api.constrains("default_code")
+    def _check_default_code(self):
+        for record in self:
+            if not re.match(r"^\d{4,8}$", record.default_code):
+                raise ValidationError(_("SKU must be 4-8 digits"))
