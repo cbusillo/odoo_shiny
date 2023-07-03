@@ -67,6 +67,11 @@ class ProductProduct(models.Model):
                     if not manufacturer:
                         manufacturer = self.env["product.manufacturer"].create({"name": shopify_product.vendor})
 
+                # Search for existing product
+                odoo_product = self.env["product.product"].search([("default_code", "=", shopify_sku)], limit=1)
+
+                odoo_condition = odoo_product.condition if odoo_product.condition else ""
+
                 product_data = {
                     "name": shopify_product.title,
                     "barcode": "",
@@ -80,10 +85,8 @@ class ProductProduct(models.Model):
                     "detailed_type": "product",
                     "is_published": True,
                     "manufacturer": manufacturer.id if manufacturer else None,
+                    "condition": "",
                 }
-
-                # Search for existing product
-                odoo_product = self.env["product.product"].search([("default_code", "=", shopify_sku)], limit=1)
 
                 if odoo_product:
                     # Update product if it exists
