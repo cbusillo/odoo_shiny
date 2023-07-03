@@ -53,17 +53,9 @@ class ProductProduct(models.Model):
                 # Extract required data
                 shopify_sku_bin = (shopify_product.variants[0].sku or "").split("-")
                 shopify_sku = shopify_sku_bin[0].strip()
-                shopify_metafields = shopify.Metafield.find(resource_id=shopify_product.id, resource="products")
-                for metafield in shopify_metafields:
-                    if metafield.key == "bin":
-                        shopify_bin = metafield.value
-                    if metafield.key == "mpn":
-                        shopify_mpn = metafield.value
-                if len(shopify_sku_bin) > 1 and shopify_bin is None:
-                    shopify_bin = shopify_sku_bin[1].strip()
 
-                if shopify_mpn is None:
-                    shopify_mpn = shopify_product_variant.barcode
+                shopify_bin = shopify_sku_bin[1].strip() if len(shopify_sku_bin) > 1 else None
+                shopify_mpn = shopify_product_variant.barcode
 
                 if shopify_product.vendor:
                     manufacturer = self.env["product.manufacturer"].search([("name", "=", shopify_product.vendor)], limit=1)
