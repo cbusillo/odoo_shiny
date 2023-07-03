@@ -7,4 +7,3 @@ access_product_scraper_url_state,model_product_scraper_url_state,model_product_s
 access_product_type,model_product_type,model_product_type,base.group_user,1,1,1,1
 access_product_manufacturer,model_product_manufacturer,model_product_manufacturer,base.group_user,1,1,1,1
 access_product_images_extension,access_product_images_extension,banks_scraping.model_product_images_extension,base.group_user,1,1,1,1
-access_product_template_mpn,access_product_template_mpn,banks_scraping.model_product_template_mpn,base.group_user,1,1,1,1
