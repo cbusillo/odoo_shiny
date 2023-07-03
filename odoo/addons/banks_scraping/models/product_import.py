@@ -35,6 +35,7 @@ class ProductImport(models.Model):
     price = fields.Float()
     cost = fields.Float()
     pic_1_url = fields.Char()
+    pic_1_bytes = fields.Image(max_width=1920, max_height=1920)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -64,6 +65,16 @@ class ProductImport(models.Model):
                 idx = fields.index("bin")
                 row[idx] = row[idx].upper()
         return super(ProductImport, self).load(fields, data)
+
+    def open_record(self):
+        self.ensure_one()
+        return { # pylint: disable=no-member
+            "type": "ir.actions.act_window",
+            "res_model": "product.import",
+            "view_mode": "form",
+            "res_id": self.id,
+        }
+
 
     def get_image_from_url(self, url: str) -> bytes | None:
         if not url:

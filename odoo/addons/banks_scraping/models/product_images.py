@@ -6,7 +6,7 @@ class ProductImagesExtension(models.Model):
     _name = "product.images.extension"
     _description = "Product Images Extension"
 
-    image_1920 = fields.Image(attachment=True, max_width=1920, max_height=1920, string="XLarge Image")
+    image_1920 = fields.Image(max_width=1920, max_height=1920, string="XLarge Image")
     image_1024 = fields.Image(compute="_compute_resized_images", store=True, readonly=True, string="Large Image")
     image_512 = fields.Image(compute="_compute_resized_images", store=True, readonly=True, string="Medium Image")
     image_256 = fields.Image(compute="_compute_resized_images", store=True, readonly=True, string="Small Image")
