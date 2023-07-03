@@ -10,5 +10,5 @@ class ProductScraperWizard(models.TransientModel):
         return {"type": "ir.actions.act_window_close"}
 
     def action_sync_shopify_products(self):
-        self.env["product.template"].sync_shopify_products()
+        self.env["product.product"].sync_shopify_products()
         return {"type": "ir.actions.act_window_close"}

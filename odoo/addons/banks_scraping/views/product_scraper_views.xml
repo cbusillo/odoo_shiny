@@ -65,7 +65,7 @@
                         <field name="url_display"/>
                         <field name="url" widget="url"/>
                         <field name="price"/>
-                        <field name="product_template_ids">
+                        <field name="product_ids">
                             <tree string="Related Product">
                                 <field name="name"/>
                             </tree>

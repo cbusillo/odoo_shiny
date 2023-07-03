@@ -12,10 +12,11 @@
     "description": "Module to scrape websites for model data.",
     "data": [
         "security/ir.model.access.csv",
+        "views/product_import_views.xml",
+        "views/product_product_views.xml",
         "views/product_scraper_views.xml",
         "views/product_template_views.xml",
-        "views/product_import_views.xml",
-        "views/product_template_wizard.xml",
+        "views/product_scraper_wizard.xml",
     ],
     "installable": True,
     "application": True,

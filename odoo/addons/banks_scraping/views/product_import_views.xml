@@ -12,6 +12,18 @@
         </field>
     </record>
 
+    <!-- Product Import: Server Action-->
+    <record id="server_action_product_import_to_products" model="ir.actions.server">
+        <field name="name">Product Import</field>
+        <field name="model_id" ref="model_product_import"/>
+        <field name="binding_model_id" ref="model_product_import"/>
+        <field name="binding_type">action</field>
+        <field name="state">code</field>
+        <field name="code">
+            action = records.import_to_products()
+        </field>
+    </record>
+
     <!-- Product Import: List View -->
     <record id="view_product_import_tree" model="ir.ui.view">
         <field name="name">product.import.tree</field>
@@ -23,7 +35,7 @@
                 <field name="manufacturer"/>
                 <field name="quantity"/>
                 <field name="bin"/>
-                <field name="title" widget="fieldtext" width="400px"/>
+                <field name="name"/>
                 <field name="description"/>
                 <field name="type"/>
                 <field name="weight"/>

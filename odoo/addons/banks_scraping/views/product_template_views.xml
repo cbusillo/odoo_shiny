@@ -1,25 +1,6 @@
 <odoo>
-    <!-- Product Template: Form View -->
-    <record id="view_product_template_form_inherit" model="ir.ui.view">
-        <field name="name">product.template.form.inherit</field>
-        <field name="model">product.template</field>
-        <field name="inherit_id" ref="product.product_template_only_form_view"/>
-        <field name="arch" type="xml">
-            <field name="default_code" position="after">
-                <field name="mpn" />
-                <field name="bin" />
-            </field>
-            <notebook position="inside">
-                <page string="Related Product Scraper">
-                    <field name="product_scraper_id" />
-                    <field name="product_scraper_html" />
-                </page>
-            </notebook>
-        </field>
-    </record>
-
     <!-- Product Template: Tree View -->
-    <record id="view_produt_template_tree_inherit" model="ir.ui.view">
+    <record id="view_product_template_tree_inherit" model="ir.ui.view">
         <field name="name">product.template.tree.inherit</field>
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_tree_view"/>
@@ -29,4 +10,86 @@
             </field>
         </field>
     </record>
+
+
+    <record id="action_product_images_extension" model="ir.actions.act_window">
+        <field name="name">Product Images</field>
+        <field name="res_model">product.images.extension</field>
+        <field name="view_mode">kanban,form</field>
+    </record>
+    <record id="view_product_images_extension_form" model="ir.ui.view">
+        <field name="name">product.images.extension.form</field>
+        <field name="model">product.images.extension</field>
+        <field name="arch" type="xml">
+            <form string="Product Images">
+                <group>
+                    <field name="image_1920" widget="image" />
+                    <field name="image_1024" widget="image" />
+                    <field name="image_512" widget="image" />
+                    <field name="image_256" widget="image" />
+                    <field name="image_128" widget="image" />
+                </group>
+            </form>
+        </field>
+    </record>
+
+
+
+    <record id="product_images_kanban_view" model="ir.ui.view">
+        <field name="name">product.images.kanban.view</field>
+        <field name="model">product.images.extension</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click">
+                            <t t-if="record and record.id">
+                                <t t-set="image_id" t-value="record.id.raw_value"/>
+                                <img t-att-src="'/web/image?model=product.images.extension&amp;id=' + image_id + '&amp;field=image_256'" class="oe_kanban_image" alt="Product Image"/>
+                            </t>
+
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+
+
+    <!-- Product Template: Form View -->
+    <record id="view_product_template_form_inherit" model="ir.ui.view">
+        <field name="name">product.template.form.inherit</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <field name="default_code" position="after">
+                <field name="manufacturer" />
+                <field name="part_type" />
+                <field name="mpn" />
+                <field name="bin" />
+            </field>
+            <notebook position="inside">
+                <page string="Related Product Scraper">
+                    <field name="product_scraper_id" />
+                    <field name="product_scraper_html" />
+                </page>
+            </notebook>
+            <xpath expr="//page[@name='inventory']" position="after">
+                <page string="Additional Images" name="additional_images">
+                    <field name="product_images" context="{'default_product_id': active_id}" options="{'kanban_view_ref': 'banks_scraping.product_images_kanban_view'}" mode="kanban">
+                    </field>
+                    <!-- <field name="product_images" context="{'default_product_id': active_id}" options="{'no_create': True, 'no_create_edit': True}" mode="tree">
+                        <tree string="Product Images" editable="bottom">
+                            <field name="image_1920" widget="image" />
+
+                            <field name="image_256" widget="image" />
+                            <field name="image_128" widget="image" />
+                        </tree>
+                    </field> -->
+                </page>
+            </xpath>
+        </field>
+    </record>
+
 </odoo>

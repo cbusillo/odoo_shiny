@@ -44,7 +44,7 @@ class ProductScraper(models.Model):
     _description = "Product Scraper"
 
     name = fields.Char()
-    source_url_ids = fields.One2many("product.scraper.source", "product_id", string="Source URL Count")
+    source_url_ids = fields.One2many("product.scraper.source", "product_id", string="Source URL Count", index=True)
     source_url_count = fields.Integer(compute="_compute_source_url_count", store=True)
     source_url_list = fields.Text(compute="_compute_source_url_list", string="Source URLs List")
     source_url_html = fields.Text(compute="_compute_source_url_html", string="Source URLs HTML")
@@ -53,7 +53,7 @@ class ProductScraper(models.Model):
     sku = fields.Char(required=True, string="SKU", index=True)
     price = fields.Float(index=True)
     brand = fields.Char(index=True)
-    product_template_ids = fields.One2many("product.template", "product_scraper_id", string="Related Products")
+    product_ids = fields.One2many("product.product", "product_scraper_id", string="Related Products")
 
     _sql_constraints = [("brand_sku_unique", "UNIQUE(brand, sku)", "The Brand and SKU must be unique!")]
 
