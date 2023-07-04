@@ -64,8 +64,6 @@
         <field name="inherit_id" ref="product.product_template_only_form_view"/>
         <field name="arch" type="xml">
             <field name="default_code" position="after">
-                <field name="image_1920" widget="image" />
-
                 <field name="condition" />
                 <field name="manufacturer" />
                 <field name="part_type" />
@@ -82,14 +80,6 @@
                 <page string="Additional Images" name="additional_images">
                     <field name="product_images" context="{'default_product_id': active_id}" options="{'kanban_view_ref': 'banks_scraping.product_images_kanban_view'}" mode="kanban">
                     </field>
-                    <!-- <field name="product_images" context="{'default_product_id': active_id}" options="{'no_create': True, 'no_create_edit': True}" mode="tree">
-                        <tree string="Product Images" editable="bottom">
-                            <field name="image_1920" widget="image" />
-
-                            <field name="image_256" widget="image" />
-                            <field name="image_128" widget="image" />
-                        </tree>
-                    </field> -->
                 </page>
             </xpath>
         </field>
