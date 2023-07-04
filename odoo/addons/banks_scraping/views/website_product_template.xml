@@ -1,6 +1,6 @@
 <odoo>
-    <template id="product_images" inherit_id="website_sale.product">
-        <xpath expr="//div[contains(@class, 'product-images')]" position="after">
+    <!-- <template id="product_images" inherit_id="website_sale.product">
+        <xpath expr="//div[@id='product_price']" position="after">
             <div class="product-images">
                 <h3 class="mt16">Additional Images:</h3>
                 <div t-foreach="product.product_images" t-as="image">
@@ -8,5 +8,5 @@
                 </div>
             </div>
         </xpath>
-    </template>
+    </template> -->
 </odoo>
