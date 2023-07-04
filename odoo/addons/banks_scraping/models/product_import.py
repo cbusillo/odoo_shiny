@@ -59,7 +59,7 @@ class ProductImport(models.Model):
     def name_get(self):
         result = []
         for record in self:
-            name = f"[{record.sku}] {record.name}"
+            name = f"[{record.sku}] {record.name or 'No Name Yet'}"
             result.append((record.id, name))
         return result
 
