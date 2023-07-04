@@ -50,9 +50,9 @@ class ProductProduct(models.Model):
 
                 shopify_product_variant = shopify_product.variants[0]
                 # shopify_product_inventory = shopify.InventoryItem.find(shopify_product_variant.inventory_item_id)
-                shopify_cost = 0.0  # shopify_cost = float(shopify_product_inventory.cost or 0.0)
-                # if hasattr(shopify_product_inventory, "cost") else 0.0
-                # Extract required data
+                # shopify_cost = float(shopify_product_inventory.cost or 0.0)
+                shopify_cost = 0.0
+
                 shopify_sku_bin = (shopify_product.variants[0].sku or "").split("-")
                 shopify_sku = shopify_sku_bin[0].strip()
 
@@ -85,7 +85,7 @@ class ProductProduct(models.Model):
                     "detailed_type": "product",
                     "is_published": True,
                     "manufacturer": manufacturer.id if manufacturer else None,
-                    "condition": "",
+                    "condition": odoo_condition,
                 }
 
                 if odoo_product:
@@ -98,11 +98,9 @@ class ProductProduct(models.Model):
                 odoo_product_template = self.env["product.template"].search([("id", "=", odoo_product.product_tmpl_id.id)], limit=1)
 
                 if odoo_product_template.image_1920 is False or odoo_product_template.image_1920 is None:
-                    for index, shopify_image in enumerate(shopify_product.images):
+                    for shopify_image in shopify_product.images:
                         response = requests.get(shopify_image.src, timeout=10)
                         image_base64 = base64.b64encode(response.content)
-                        if index == 0:
-                            odoo_product_template.image_1920 = image_base64
                         self.env["product.images.extension"].create(
                             {
                                 "product_id": odoo_product_template.id,

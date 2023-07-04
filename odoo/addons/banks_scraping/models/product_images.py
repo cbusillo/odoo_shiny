@@ -23,14 +23,3 @@ class ProductImagesExtension(models.Model):
                 record.image_512 = base64.b64encode(tools.image_process(image_1920_base64, size=(512, 512)))
                 record.image_256 = base64.b64encode(tools.image_process(image_1920_base64, size=(256, 256)))
                 record.image_128 = base64.b64encode(tools.image_process(image_1920_base64, size=(128, 128)))
-
-    @api.model
-    def create(self, vals_list):
-        if not isinstance(vals_list, list):
-            vals_list = [vals_list]
-        for vals in vals_list:
-            new_image = super().create(vals)
-            product_images = self.search([("product_id", "=", new_image.product_id.id)])  # pylint: disable=no-member
-            if len(product_images) == 1:
-                new_image.product_id.image_1920 = new_image.image_1920  # pylint: disable=no-member
-        return new_image

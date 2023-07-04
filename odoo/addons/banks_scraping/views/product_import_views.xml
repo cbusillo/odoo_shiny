@@ -42,8 +42,9 @@
                 <field name="weight"/>
                 <field name="price"/>
                 <field name="cost"/>
-                <field name="pic_1_url"/>
-                <field name="pic_1_bytes"/>
+                <field name="image_1_url"/>
+                <field name="images"/>
+                <field name="image_upload"/>
                 <button name="open_record" type="object" string="Open"/>
             </tree>
         </field>
@@ -73,8 +74,8 @@
                         <field name="cost"/>
                     </group>
                     <group>
-                        <field name="pic_1_url"/>
-                        <field name="pic_1_bytes"/>
+                        <field name="image_1_url"/>
+                        <field name="images"/>
 
                     </group>
                 </sheet>
