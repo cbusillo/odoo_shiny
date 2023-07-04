@@ -6,5 +6,4 @@ access_product_import,access.product.import,model_product_import,base.group_user
 access_product_scraper_url_state,model_product_scraper_url_state,model_product_scraper_url_state,base.group_user,1,1,1,1
 access_product_type,model_product_type,model_product_type,base.group_user,1,1,1,1
 access_product_manufacturer,model_product_manufacturer,model_product_manufacturer,base.group_user,1,1,1,1
-access_product_images,access_product_images,model_product_images,base.group_user,1,1,1,1
 access_product_import_image,access_product_import_image,model_product_import_image,base.group_user,1,1,1,1

@@ -10,7 +10,6 @@ class ProductTemplate(models.Model):
     mpn = fields.Char(string="MPN", index=True)
     manufacturer = fields.Many2one("product.manufacturer", index=True)
     part_type = fields.Many2one("product.type", index=True)
-    product_image_ids = fields.One2many("product.images", "product_id")
     condition = fields.Selection(
         [
             ("used", "Used"),
@@ -23,6 +22,7 @@ class ProductTemplate(models.Model):
     )
     # Override fields:
     default_code = fields.Char("SKU", index=True, required=False)
+    # product_template_image_ids = fields.One2many("product.image", "product_tmpl_id", string="Product Images")
     image_1920 = fields.Image(compute="_compute_image_1920", inverse="_inverse_image_1920", store=True)
 
     product_scraper_id = fields.Many2one(
@@ -50,17 +50,17 @@ class ProductTemplate(models.Model):
             if not re.match(r"^\d{4,8}$", record.default_code):
                 raise ValidationError(_("SKU must be 4-8 digits"))
 
-    @api.depends("product_image_ids", "product_image_ids.image_1920")
+    @api.depends("product_template_image_ids")
     def _compute_image_1920(self):
         for record in self:
-            if record.product_image_ids:
-                record.image_1920 = record.product_images[0].image_1920
+            if record.product_template_image_ids:
+                record.image_1920 = record.product_template_image_ids[0].image_1920
             else:
                 record.image_1920 = False
 
     def _inverse_image_1920(self):
         for record in self:
-            if record.product_image_ids:
-                record.product_image_ids[0].write({"image_1920": record.image_1920})
+            if record.product_template_image_ids:
+                record.product_template_image_ids[0].write({"image_1920": record.image_1920})
             elif record.image_1920:
-                self.env["product.images"].create({"product_id": record.id, "image_1920": record.image_1920})
+                self.env["product.image"].create({"product_tmpl_id": record.id, "image_1920": record.image_1920})

@@ -98,18 +98,21 @@ class ProductProduct(models.Model):
                 odoo_product_template = self.env["product.template"].search([("id", "=", odoo_product.product_tmpl_id.id)], limit=1)
 
                 if odoo_product_template.image_1920 is False or odoo_product_template.image_1920 is None:
-                    for shopify_image in shopify_product.images:
+                    for index, shopify_image in enumerate(shopify_product.images):
                         response = requests.get(shopify_image.src, timeout=10)
                         image_base64 = base64.b64encode(response.content)
-                        self.env["product.images"].create(
+                        self.env["product.image"].create(
                             {
-                                "product_id": odoo_product_template.id,
+                                "product_tmpl_id": odoo_product_template.id,
+                                "name": index,
                                 "image_1920": image_base64,
                             }
                         )
 
                 if shopify_product.variants[0].inventory_quantity:
-                    odoo_product.update_quantity(shopify_product.variants[0].inventory_quantity)
+                    pass
+                    # TODO: turn back on after testing
+                    # odoo_product.update_quantity(shopify_product.variants[0].inventory_quantity)
 
                 # time.sleep(0.5)  # Pause for 500ms
             # Go to next page of products

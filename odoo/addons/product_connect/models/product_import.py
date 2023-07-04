@@ -44,7 +44,7 @@ class ProductImport(models.Model):
     cost = fields.Float()
     image_1_url = fields.Char(string="Image 1 URL")
     image_upload = fields.Image(max_width=1920, max_height=1920)
-    images = fields.One2many("product.import.image", "product_id")
+    image_ids = fields.One2many("product.import.image", "product_id")
     condition = fields.Selection(
         [
             ("used", "Used"),
@@ -95,7 +95,13 @@ class ProductImport(models.Model):
     @api.onchange("image_upload")
     def _onchange_image_upload(self):
         if self.image_upload:
-            self.images = [(0, 0, {"image_data": self.image_upload})]
+            image = self.env["product.import.image"].create(
+                {
+                    "image_data": self.image_upload,
+                    "product_id": self.id,
+                }
+            )
+            self.image_ids |= image
             self.image_upload = False
 
     def open_record(self):
@@ -148,15 +154,36 @@ class ProductImport(models.Model):
                 product.write(product_data)
             else:
                 product = self.env["product.product"].create(product_data)
-            product.update_quantity(record.quantity)
+            # product.update_quantity(record.quantity)
+            pass  # remove above line if you want to update quantity
+
+            current_images = self.env["product.image"].search([("product_tmpl_id", "=", product.product_tmpl_id.id)])
+            current_index = 1
+            for image in current_images:
+                if int(image.name or 0) > current_index:
+                    current_index = int(image.name or 1)
 
             if record.image_1_url:
                 image_data = self.get_image_from_url(record.image_1_url)
                 if image_data:
-                    self.env["product.images"].create({"image_1920": image_data, "product_id": product.product_tmpl_id.id})
+                    self.env["product.image"].create(
+                        {
+                            "image_1920": image_data,
+                            "product_tmpl_id": product.product_tmpl_id.id,
+                            "name": current_index,
+                        }
+                    )
+                    current_index += 1
 
-            for image in record.images:
-                self.env["product.images"].create({"image_1920": image.image_data, "product_id": product.product_tmpl_id.id})
+            for image in record.image_ids:
+                self.env["product.image"].create(
+                    {
+                        "image_1920": image.image_data,
+                        "product_tmpl_id": product.product_tmpl_id.id,
+                        "name": current_index,
+                    }
+                )
+                current_index += 1
 
             record.unlink()
         return {"type": "ir.actions.client", "tag": "reload"}

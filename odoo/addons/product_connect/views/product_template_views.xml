@@ -12,51 +12,6 @@
     </record>
 
 
-    <record id="action_product_images" model="ir.actions.act_window">
-        <field name="name">Product Images</field>
-        <field name="res_model">product.images</field>
-        <field name="view_mode">kanban,form</field>
-    </record>
-    <record id="view_product_images_form" model="ir.ui.view">
-        <field name="name">product.images.form</field>
-        <field name="model">product.images</field>
-        <field name="arch" type="xml">
-            <form string="Product Images">
-                <group>
-                    <field name="image_1920" widget="image" />
-                    <field name="image_1024" widget="image" />
-                    <field name="image_512" widget="image" />
-                    <field name="image_256" widget="image" />
-                    <field name="image_128" widget="image" />
-                </group>
-            </form>
-        </field>
-    </record>
-
-
-
-    <record id="product_images_kanban_view" model="ir.ui.view">
-        <field name="name">product.images.kanban.view</field>
-        <field name="model">product.images</field>
-        <field name="arch" type="xml">
-            <kanban>
-                <templates>
-                    <t t-name="kanban-box">
-                        <div t-attf-class="oe_kanban_global_click">
-                            <t t-if="record and record.id">
-                                <t t-set="image_id" t-value="record.id.raw_value"/>
-                                <img t-att-src="'/web/image?model=product.images&amp;id=' + image_id + '&amp;field=image_256'" class="oe_kanban_image" alt="Product Image"/>
-                            </t>
-
-                        </div>
-                    </t>
-                </templates>
-            </kanban>
-        </field>
-    </record>
-
-
-
     <!-- Product Template: Form View -->
     <record id="view_product_template_form_inherit" model="ir.ui.view">
         <field name="name">product.template.form.inherit</field>
@@ -76,12 +31,6 @@
                     <field name="product_scraper_html" />
                 </page>
             </notebook>
-            <xpath expr="//page[@name='inventory']" position="after">
-                <page string="Additional Images" name="additional_images">
-                    <field name="product_image_ids" context="{'default_product_id': active_id}" options="{'kanban_view_ref': 'product_connect.product_images_kanban_view'}" mode="kanban">
-                    </field>
-                </page>
-            </xpath>
         </field>
     </record>
 
