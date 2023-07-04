@@ -154,8 +154,7 @@ class ProductImport(models.Model):
                 product.write(product_data)
             else:
                 product = self.env["product.product"].create(product_data)
-            # product.update_quantity(record.quantity)
-            pass  # remove above line if you want to update quantity
+            product.update_quantity(record.quantity)
 
             current_images = self.env["product.image"].search([("product_tmpl_id", "=", product.product_tmpl_id.id)])
             current_index = 1

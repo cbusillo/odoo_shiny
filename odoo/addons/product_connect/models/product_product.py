@@ -110,9 +110,7 @@ class ProductProduct(models.Model):
                         )
 
                 if shopify_product.variants[0].inventory_quantity:
-                    pass
-                    # TODO: turn back on after testing
-                    # odoo_product.update_quantity(shopify_product.variants[0].inventory_quantity)
+                    odoo_product.update_quantity(shopify_product.variants[0].inventory_quantity)
 
                 # time.sleep(0.5)  # Pause for 500ms
             # Go to next page of products
