@@ -1,9 +1,4 @@
 <odoo>
-    <!-- Menu item: accessible from the main menu -->
-    <menuitem id="menu_product_scraper" name="Scraped Products" action="action_product_scraper"/>
-    <menuitem id="menu_product_scraper_url_state" name="Scraped URL State" action="action_product_scraper_url_state"/>
-    <menuitem id="menu_product_scraper_source" name="Scraped Source" action="action_product_scraper_source"/>
-
     <!-- Product Scraper: Action -->
     <record id="action_product_scraper" model="ir.actions.act_window">
         <field name="name">Product Scraper</field>
@@ -139,4 +134,10 @@
             </tree>
         </field>
     </record>
+
+    <!-- Menu item: accessible from the main menu -->
+    <menuitem id="menu_product_scraper" name="Scraped Products" action="action_product_scraper"/>
+    <menuitem id="menu_product_scraper_url_state" name="Scraped URL State" action="action_product_scraper_url_state"/>
+    <menuitem id="menu_product_scraper_source" name="Scraped Source" action="action_product_scraper_source"/>
+
 </odoo>
