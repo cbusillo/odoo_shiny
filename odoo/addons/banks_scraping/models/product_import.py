@@ -56,6 +56,13 @@ class ProductImport(models.Model):
         default="used",
     )
 
+    def name_get(self):
+        result = []
+        for record in self:
+            name = f"[{record.sku}] {record.name}"
+            result.append((record.id, name))
+        return result
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
