@@ -153,12 +153,10 @@ class ProductImport(models.Model):
             if record.image_1_url:
                 image_data = self.get_image_from_url(record.image_1_url)
                 if image_data:
-                    self.env["product.images.extension"].create({"image_1920": image_data, "product_id": product.product_tmpl_id.id})
+                    self.env["product.images"].create({"image_1920": image_data, "product_id": product.product_tmpl_id.id})
 
             for image in record.images:
-                self.env["product.images.extension"].create(
-                    {"image_1920": image.image_data, "product_id": product.product_tmpl_id.id}
-                )
+                self.env["product.images"].create({"image_1920": image.image_data, "product_id": product.product_tmpl_id.id})
 
             record.unlink()
         return {"type": "ir.actions.client", "tag": "reload"}

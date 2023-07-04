@@ -2,9 +2,9 @@ import base64
 from odoo import api, fields, models, tools
 
 
-class ProductImagesExtension(models.Model):
-    _name = "product.images.extension"
-    _description = "Product Images Extension"
+class ProductImages(models.Model):
+    _name = "product.images"
+    _description = "Product Images"
 
     image_1920 = fields.Image(max_width=1920, max_height=1920, string="XLarge Image")
     image_1024 = fields.Image(compute="_compute_resized_images", store=True, readonly=True, string="Large Image")

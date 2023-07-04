@@ -10,7 +10,7 @@ class ProductTemplate(models.Model):
     mpn = fields.Char(string="MPN", index=True)
     manufacturer = fields.Many2one("product.manufacturer", index=True)
     part_type = fields.Many2one("product.type", index=True)
-    product_images = fields.One2many("product.images.extension", "product_id")
+    product_images = fields.One2many("product.images", "product_id")
     condition = fields.Selection(
         [
             ("used", "Used"),
@@ -63,4 +63,4 @@ class ProductTemplate(models.Model):
             if record.product_images:
                 record.product_images[0].write({"image_1920": record.image_1920})
             elif record.image_1920:
-                self.env["product.images.extension"].create({"product_id": record.id, "image_1920": record.image_1920})
+                self.env["product.images"].create({"product_id": record.id, "image_1920": record.image_1920})

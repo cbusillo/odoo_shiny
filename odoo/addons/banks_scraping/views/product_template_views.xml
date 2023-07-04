@@ -12,14 +12,14 @@
     </record>
 
 
-    <record id="action_product_images_extension" model="ir.actions.act_window">
+    <record id="action_product_images" model="ir.actions.act_window">
         <field name="name">Product Images</field>
-        <field name="res_model">product.images.extension</field>
+        <field name="res_model">product.images</field>
         <field name="view_mode">kanban,form</field>
     </record>
-    <record id="view_product_images_extension_form" model="ir.ui.view">
-        <field name="name">product.images.extension.form</field>
-        <field name="model">product.images.extension</field>
+    <record id="view_product_images_form" model="ir.ui.view">
+        <field name="name">product.images.form</field>
+        <field name="model">product.images</field>
         <field name="arch" type="xml">
             <form string="Product Images">
                 <group>
@@ -37,7 +37,7 @@
 
     <record id="product_images_kanban_view" model="ir.ui.view">
         <field name="name">product.images.kanban.view</field>
-        <field name="model">product.images.extension</field>
+        <field name="model">product.images</field>
         <field name="arch" type="xml">
             <kanban>
                 <templates>
@@ -45,7 +45,7 @@
                         <div t-attf-class="oe_kanban_global_click">
                             <t t-if="record and record.id">
                                 <t t-set="image_id" t-value="record.id.raw_value"/>
-                                <img t-att-src="'/web/image?model=product.images.extension&amp;id=' + image_id + '&amp;field=image_256'" class="oe_kanban_image" alt="Product Image"/>
+                                <img t-att-src="'/web/image?model=product.images&amp;id=' + image_id + '&amp;field=image_256'" class="oe_kanban_image" alt="Product Image"/>
                             </t>
 
                         </div>

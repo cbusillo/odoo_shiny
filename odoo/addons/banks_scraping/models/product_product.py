@@ -101,7 +101,7 @@ class ProductProduct(models.Model):
                     for shopify_image in shopify_product.images:
                         response = requests.get(shopify_image.src, timeout=10)
                         image_base64 = base64.b64encode(response.content)
-                        self.env["product.images.extension"].create(
+                        self.env["product.images"].create(
                             {
                                 "product_id": odoo_product_template.id,
                                 "image_1920": image_base64,

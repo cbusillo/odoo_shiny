@@ -17,6 +17,7 @@
         "views/product_scraper_views.xml",
         "views/product_template_views.xml",
         "views/product_scraper_wizard.xml",
+        "views/website_product_template.xml",
     ],
     "installable": True,
     "application": True,
