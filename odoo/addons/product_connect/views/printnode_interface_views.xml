@@ -1,0 +1,29 @@
+<odoo>
+    <!-- Printnode Interface: Form View-->
+    <record id="view_printnode_interface_form" model="ir.ui.view">
+        <field name="name">printnode.interface.form</field>
+        <field name="model">printnode.interface</field>
+        <field name="arch" type="xml">
+            <form string="PrintNode Interface">
+                <field name="user_id"></field>
+                <field name="printer_selection"/>
+                <!-- ... -->
+            </form>
+        </field>
+    </record>
+
+    <!-- Printnode Interface: Action -->
+    <record id="action_print_node_interface" model="ir.actions.act_window">
+        <field name="name">PrintNode Interface</field>
+        <field name="res_model">printnode.interface</field>
+        <field name="view_mode">form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+            Click on Create to add a new PrintNode Interface.
+            </p>
+        </field>
+    </record>
+
+    <!-- Printnode Interface: Menu item -->
+    <menuitem id="menu_print_node_interface" name="PrintNode Interface" parent="base.menu_administration" sequence="10" action="action_print_node_interface"/>
+</odoo>

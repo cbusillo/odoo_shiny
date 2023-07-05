@@ -7,3 +7,5 @@ access_product_scraper_url_state,model_product_scraper_url_state,model_product_s
 access_product_type,model_product_type,model_product_type,base.group_user,1,1,1,1
 access_product_manufacturer,model_product_manufacturer,model_product_manufacturer,base.group_user,1,1,1,1
 access_product_import_image,access_product_import_image,model_product_import_image,base.group_user,1,1,1,1
+access_shopify_sync,access_shopify_sync,model_shopify_sync,base.group_user,1,1,1,1
+access_printnode_interface,access_printnode_interface,model_printnode_interface,base.group_user,1,1,1,1

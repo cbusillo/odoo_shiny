@@ -11,7 +11,9 @@
     "depends": ["base", "product", "web", "website_sale"],
     "description": "Module to scrape websites for model data.",
     "data": [
+        "data/res_config_data.xml",
         "security/ir.model.access.csv",
+        "views/printnode_interface_views.xml",
         "views/product_scraper_wizard.xml",  # Needs to be before product_template_views.xml to allow button for action
         "views/product_import_views.xml",
         "views/product_product_views.xml",

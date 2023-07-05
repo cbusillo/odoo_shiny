@@ -30,6 +30,9 @@ class ProductTemplate(models.Model):
     )
     product_scraper_html = fields.Text(related="product_scraper_id.source_url_html", string="Product Scraper HTML", readonly=True)
     combined_description = fields.Html(compute="_compute_combined_description", readonly=False)
+    shopify_product_id = fields.Char(
+        related="product_variant_ids.shopify_product_id", string="Shopify Product ID", readonly=True, store=True
+    )
 
     @api.depends("description_sale", "product_scraper_html")
     def _compute_combined_description(self):

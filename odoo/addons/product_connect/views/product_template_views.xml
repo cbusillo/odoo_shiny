@@ -24,6 +24,8 @@
                 <field name="part_type" />
                 <field name="mpn" />
                 <field name="bin" />
+                <field name="shopify_product_id"/>
+
             </field>
             <notebook position="inside">
                 <page string="Related Product Scraper">
