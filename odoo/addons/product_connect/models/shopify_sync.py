@@ -221,7 +221,10 @@ class ShopifySync(models.AbstractModel):
 
         for odoo_product in odoo_products:
             try:
-                shopify_product = shopify.Product.find(odoo_product.shopify_product_id)
+                if odoo_product.shopify_product_id:
+                    shopify_product = shopify.Product.find(odoo_product.shopify_product_id)
+                else:
+                    raise AttributeError
             except (pyactiveresource.connection.ResourceNotFound, AttributeError):
                 shopify_product = shopify.Product()
 
