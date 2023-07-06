@@ -1,4 +1,4 @@
-from odoo import models, fields
+from odoo import models, fields, api
 
 
 class ProductProduct(models.Model):
@@ -8,6 +8,7 @@ class ProductProduct(models.Model):
     ]
 
     shopify_product_id = fields.Char(copy=False)
+    shopify_last_exported = fields.Datetime(string="Last Exported Time")
 
     def update_quantity(self, quantity):
         stock_location = self.env.ref("stock.stock_location_stock")

@@ -9,7 +9,7 @@ from pytz import utc
 import shopify
 import requests
 
-from odoo import models, api
+from odoo import models, api, fields
 
 
 class ShopifySync(models.AbstractModel):
@@ -54,10 +54,24 @@ class ShopifySync(models.AbstractModel):
                     odoo_product_template_write_date = (
                         odoo_product_template.write_date.replace(tzinfo=utc) if odoo_product_template.write_date else None
                     )
+                    odoo_product_product_shopify_last_exported = (
+                        odoo_product_product.shopify_last_exported.replace(tzinfo=utc)
+                        if odoo_product_product.shopify_last_exported
+                        else None
+                    )
                     if import_time_last.year < 2001:
                         latest_write_date = datetime.datetime(2000, 1, 1, tzinfo=utc)
                     else:
-                        latest_write_date = max(filter(None, [odoo_product_product_write_date, odoo_product_template_write_date]))
+                        latest_write_date = max(
+                            filter(
+                                None,
+                                [
+                                    odoo_product_product_write_date,
+                                    odoo_product_template_write_date,
+                                    odoo_product_product_shopify_last_exported,
+                                ],
+                            )
+                        )
 
                     # If Shopify product is newer than Odoo product, import it
                     if shopify_updated_at > latest_write_date:
@@ -70,9 +84,8 @@ class ShopifySync(models.AbstractModel):
             try:
                 shopify_products = shopify_products.next_page()
             except IndexError:
+                self.env["ir.config_parameter"].sudo().set_param("shopify.import_time_last", import_time_start.isoformat())
                 break
-
-            self.env["ir.config_parameter"].sudo().set_param("shopify.import_time_last", import_time_start.isoformat())
 
     @api.model
     def import_shopify_product(self, shopify_product):
@@ -105,7 +118,12 @@ class ShopifySync(models.AbstractModel):
         # Search for existing product
         odoo_product = self.env["product.product"].search([("default_code", "=", shopify_sku)], limit=1)
 
-        odoo_condition = odoo_product.condition if odoo_product.condition else ""
+        shopify_condition = None
+        metafields = shopify_product.metafields()
+        for metafield in metafields:
+            if metafield.key == "condition":
+                shopify_condition = metafield.value
+                break
 
         product_data = {
             "name": shopify_product.title,
@@ -120,7 +138,7 @@ class ShopifySync(models.AbstractModel):
             "detailed_type": "product",
             "is_published": True if shopify_product.status.lower() == "active" else False,
             "manufacturer": manufacturer.id if manufacturer else None,
-            "condition": odoo_condition,
+            "condition": shopify_condition if shopify_condition else odoo_product.condition,
             "shopify_product_id": shopify_product.id,
             "part_type": part_type.id if part_type else None,
         }
@@ -176,15 +194,25 @@ class ShopifySync(models.AbstractModel):
         )
 
     @api.model
+    def export_product_image(self, shopify_product_id, odoo_image, index):
+        shopify.Image.create(
+            {
+                "product_id": shopify_product_id,
+                "position": index,
+                "attachment": odoo_image.image_1920.decode("utf-8"),
+            }
+        )
+
+    @api.model
     def export_to_shopify(self):
         # Setup Shopify API
 
         export_time_last = self.env["ir.config_parameter"].sudo().get_param("shopify.export_time_last")
-        export_time_start = datetime.datetime.now().isoformat()
+        export_time_start = datetime.datetime.now(tzutc())
 
         # Get all products from Odoo
         odoo_products = self.env["product.product"].search([("write_date", ">", export_time_last)])
-        odoo_products = self.env["product.product"].search([("name", "ilike", "BR9ES")])
+        odoo_products = self.env["product.product"].search([("name", "ilike", "QL86C")])
         # TODO: remove filter after testing single product
 
         for odoo_product in odoo_products:
@@ -212,12 +240,41 @@ class ShopifySync(models.AbstractModel):
             shopify_product.variants = [variant]
 
             shopify_product.save()  # returns False if the record couldn't be saved
-            if not odoo_product.shopify_product_id or True:  # TODO: remove True after testing single product
+            metafields = shopify.Metafield.find(owner_resource="product", owner_id=shopify_product.id)
+            condition_metafield = next((mf for mf in metafields if mf.key == "condition"), None)
+
+            if condition_metafield:
+                # Update existing metafield
+                condition_metafield.value = odoo_product.condition
+                condition_metafield.save()
+            else:
+                # Create new metafield
+                condition_metafield = shopify.Metafield()
+                condition_metafield.key = "condition"
+                condition_metafield.value = odoo_product.condition
+                condition_metafield.type = "single_line_text_field"
+                condition_metafield.namespace = "custom"
+                condition_metafield.owner_resource = "product"
+                condition_metafield.owner_id = shopify_product.id
+                condition_metafield.save()
+
+            if odoo_product.shopify_product_id:
+                odoo_product.write(
+                    {
+                        "shopify_last_exported": fields.Datetime.now(),
+                        "shopify_product_id": shopify_product.id,
+                    }
+                )
+
+            else:
                 locations = shopify.Location.find()
                 location_id = locations[0].id
                 inventory_item_id = shopify_product.variants[0].inventory_item_id
                 shopify.InventoryLevel.adjust(location_id, inventory_item_id, int(odoo_product.qty_available))
 
-            odoo_product.shopify_product_id = shopify_product.id
+                for odoo_image in sorted(
+                    odoo_product.product_tmpl_id.product_template_image_ids, key=lambda image: image.name, reverse=True
+                ):
+                    self.export_product_image(shopify_product.id, odoo_image, odoo_image.name)
 
-        self.env["ir.config_parameter"].sudo().set_param("shopify.export_time_last", export_time_start)
+        self.env["ir.config_parameter"].sudo().set_param("shopify.export_time_last", export_time_start.isoformat())

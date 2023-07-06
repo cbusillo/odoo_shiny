@@ -7,7 +7,7 @@
             <form string="Start Scraping">
                 <footer>
                     <button name="action_scrape_website" string="Start Scraping" class="btn-primary" type="object" context="{'immediate_execute': True}"/>
-                    <button name="action_sync_with_shopify" string="Sync Shopify Products" class="btn-secondary" type="object" context="{'immediate_execute': True}"/>
+                    <button name="action_sync_with_shopify" string="Sync Shopify Products" class="btn-primary" type="object" context="{'immediate_execute': True}"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
@@ -16,7 +16,7 @@
 
     <!-- Action to Open Wizard -->
     <record id="action_product_scraper_wizard" model="ir.actions.act_window">
-        <field name="name">Product Scraper</field>
+        <field name="name">Run Functions</field>
         <field name="res_model">product.scraper.wizard</field>
         <field name="view_mode">form</field>
         <field name="view_id" ref="view_product_scraper_wizard_form"/>

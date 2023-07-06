@@ -1,7 +1,7 @@
 import base64
 import logging
 import requests
-from odoo import fields, models, api
+from odoo import fields, models, api, exceptions
 
 _logger = logging.getLogger(__name__)
 
@@ -104,6 +104,20 @@ class ProductImport(models.Model):
             self.image_ids |= image
             self.image_upload = False
 
+    @api.onchange("mpn", "condition")
+    def _onchange_mpn(self):
+        if self.mpn and self.condition == "new":
+            is_new_record = isinstance(self.id, models.NewId)
+            if is_new_record:
+                product_import_mpn = self.env["product.import"].search([("mpn", "=", self.mpn)], limit=1)
+            else:
+                product_import_mpn = self.env["product.import"].search([("mpn", "=", self.mpn), ("id", "!=", self.id)], limit=1)
+            product_template_mpn = self.env["product.template"].search([("mpn", "=", self.mpn)], limit=1)
+
+            existing_sku = product_template_mpn.default_code or product_import_mpn.sku
+            if existing_sku:
+                raise exceptions.UserError(f"A product with the same MPN already exists.  Its SKU is {existing_sku}")
+
     def open_record(self):
         self.ensure_one()
         return {  # pylint: disable=no-member
@@ -141,9 +155,9 @@ class ProductImport(models.Model):
                 "name": record.name or product.name,
                 "description_sale": record.description or product.description_sale,
                 "part_type": record.type.id or product.part_type.id,
-                "weight": record.weight or product.weight,
-                "list_price": record.price or product.list_price,
-                "standard_price": record.cost or product.standard_price,
+                "weight": record.weight if record.weight > 0 else product.weight,
+                "list_price": record.price if record.price > 0 else product.list_price,
+                "standard_price": record.cost if record.cost > 0 else product.standard_price,
                 "condition": record.condition or product.condition,
                 "detailed_type": "product",
                 "is_published": True,
@@ -154,7 +168,8 @@ class ProductImport(models.Model):
                 product.write(product_data)
             else:
                 product = self.env["product.product"].create(product_data)
-            product.update_quantity(record.quantity)
+            if record.quantity > 0:
+                product.update_quantity(record.quantity)
 
             current_images = self.env["product.image"].search([("product_tmpl_id", "=", product.product_tmpl_id.id)])
             current_index = 1
@@ -183,6 +198,16 @@ class ProductImport(models.Model):
                     }
                 )
                 current_index += 1
-
-            record.unlink()
+            # TODO: remove after testing
+            # record.unlink()
         return {"type": "ir.actions.client", "tag": "reload"}
+
+    def open_product_import_wizard(self):
+        return {
+            "name": "Calculate Costs",
+            "type": "ir.actions.act_window",
+            "res_model": "product.import.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {"default_selected_product_ids": self.ids},
+        }

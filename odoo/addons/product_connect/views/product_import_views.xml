@@ -34,7 +34,7 @@
                 <field name="condition"/>
                 <field name="mpn"/>
                 <field name="manufacturer"/>
-                <field name="quantity"/>
+                <field name="quantity" sum="Total Quantity"/>
                 <field name="bin"/>
                 <field name="name"/>
                 <field name="description"/>
@@ -96,6 +96,8 @@
         <field name="padding">6</field>
         <field name="number_next">8000</field>
     </record>
+
+
     <menuitem id="menu_product_import" name="Product Import" action="action_product_import"/>
 </odoo>
 

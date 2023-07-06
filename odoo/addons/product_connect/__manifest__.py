@@ -20,6 +20,7 @@
         "views/product_scraper_views.xml",
         "views/product_template_views.xml",
         "views/website_product_template.xml",
+        "views/product_import_wizard.xml",
     ],
     "installable": True,
     "application": True,
