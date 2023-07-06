@@ -36,6 +36,7 @@ class ShopifySync(models.AbstractModel):
         import_time_last_str = self.env["ir.config_parameter"].sudo().get_param("shopify.import_time_last")
 
         import_time_start = datetime.datetime.now(tzutc())
+        import_time_last = parse(import_time_last_str).astimezone(tzutc())
         shopify_products = shopify.Product.find(updated_at_min=import_time_last_str)
 
         while shopify_products:
@@ -43,17 +44,27 @@ class ShopifySync(models.AbstractModel):
                 shopify_updated_at = parse(shopify_product.updated_at).astimezone(tzutc())
 
                 # Search for the corxesponding Odoo product using the SKU
-                odoo_product = self.env["product.product"].search([("shopify_product_id", "=", shopify_product.id)], limit=1)
+                odoo_product_product = self.env["product.product"].search([("shopify_product_id", "=", shopify_product.id)], limit=1)
 
-                if odoo_product:
-                    odoo_product_updated_at = odoo_product.write_date.replace(tzinfo=utc)
+                if odoo_product_product:
+                    odoo_product_template = odoo_product_product.product_tmpl_id
+                    odoo_product_product_write_date = (
+                        odoo_product_product.write_date.replace(tzinfo=utc) if odoo_product_product.write_date else None
+                    )
+                    odoo_product_template_write_date = (
+                        odoo_product_template.write_date.replace(tzinfo=utc) if odoo_product_template.write_date else None
+                    )
+                    if import_time_last.year < 2001:
+                        latest_write_date = datetime.datetime(2000, 1, 1, tzinfo=utc)
+                    else:
+                        latest_write_date = max(filter(None, [odoo_product_product_write_date, odoo_product_template_write_date]))
 
                     # If Shopify product is newer than Odoo product, import it
-                    if shopify_updated_at > odoo_product_updated_at:
+                    if shopify_updated_at > latest_write_date:
                         self.import_shopify_product(shopify_product)
 
                 # If the product doesn't exist in Odoo yet, import it
-                elif not odoo_product:
+                elif not odoo_product_product:
                     self.import_shopify_product(shopify_product)
 
             try:
@@ -84,6 +95,13 @@ class ShopifySync(models.AbstractModel):
 
         if shopify_product.vendor:
             manufacturer = self.find_or_add_manufacturer(shopify_product.vendor)
+        else:
+            manufacturer = None
+
+        if shopify_product.product_type:
+            part_type = self.find_or_add_product_type(shopify_product.product_type)
+        else:
+            part_type = None
         # Search for existing product
         odoo_product = self.env["product.product"].search([("default_code", "=", shopify_sku)], limit=1)
 
@@ -100,10 +118,11 @@ class ShopifySync(models.AbstractModel):
             "description_sale": shopify_product.body_html,
             "weight": shopify_product_variant.weight,
             "detailed_type": "product",
-            "is_published": True,
+            "is_published": True if shopify_product.status.lower() == "active" else False,
             "manufacturer": manufacturer.id if manufacturer else None,
             "condition": odoo_condition,
             "shopify_product_id": shopify_product.id,
+            "part_type": part_type.id if part_type else None,
         }
 
         if odoo_product:
@@ -131,6 +150,15 @@ class ShopifySync(models.AbstractModel):
         return manufacturer
 
     @api.model
+    def find_or_add_product_type(self, product_type_name):
+        product_type = self.env["product.type"].search([("name", "=", product_type_name)], limit=1)
+
+        if not product_type:
+            product_type = self.env["product.type"].create({"name": product_type_name})
+
+        return product_type
+
+    @api.model
     def update_product_quantity_in_odoo(self, shopify_quantity, odoo_product):
         if shopify_quantity:
             odoo_product.update_quantity(shopify_quantity)
@@ -156,20 +184,22 @@ class ShopifySync(models.AbstractModel):
 
         # Get all products from Odoo
         odoo_products = self.env["product.product"].search([("write_date", ">", export_time_last)])
-        odoo_products = self.env["product.product"].search([("name", "ilike", "5006220")])
+        odoo_products = self.env["product.product"].search([("name", "ilike", "BR9ES")])
         # TODO: remove filter after testing single product
 
         for odoo_product in odoo_products:
-            shopify_product = shopify.Product.find(odoo_product.shopify_product_id)
-            if not shopify_product:
+            if odoo_product.shopify_product_id:
+                shopify_product = shopify.Product.find(odoo_product.shopify_product_id)
+            if not odoo_product.shopify_product_id:
                 # product doesn't exist in Shopify yet, so create a new one
                 shopify_product = shopify.Product()
 
             # Set product data
             shopify_product.title = odoo_product.name
-            shopify_product.body_html = "test" + odoo_product.description_sale
+            shopify_product.body_html = odoo_product.description_sale
             shopify_product.vendor = odoo_product.manufacturer.name if odoo_product.manufacturer else None
-            shopify_product.product_type = odoo_product.part_type.name
+            shopify_product.product_type = odoo_product.part_type.name if odoo_product.part_type else None
+            shopify_product.status = "active" if odoo_product.is_published and odoo_product.qty_available > 0 else "draft"
 
             # Create a variant for the product
             variant = shopify.Variant()
@@ -177,13 +207,17 @@ class ShopifySync(models.AbstractModel):
             variant.sku = f"{odoo_product.default_code} - {odoo_product.bin}"
             variant.barcode = odoo_product.mpn
             variant.inventory_management = "shopify"
-            # if variant.inventory_quantity is None:
-            # need to check for existing inventory before updating.
-            #    variant.inventory_quantity = odoo_product.qty_available
-            variant.weight = odoo_product.weight
 
-            # Assign the variant data to the product
+            variant.weight = odoo_product.weight
             shopify_product.variants = [variant]
 
             shopify_product.save()  # returns False if the record couldn't be saved
+            if not odoo_product.shopify_product_id or True:  # TODO: remove True after testing single product
+                locations = shopify.Location.find()
+                location_id = locations[0].id
+                inventory_item_id = shopify_product.variants[0].inventory_item_id
+                shopify.InventoryLevel.adjust(location_id, inventory_item_id, int(odoo_product.qty_available))
+
+            odoo_product.shopify_product_id = shopify_product.id
+
         self.env["ir.config_parameter"].sudo().set_param("shopify.export_time_last", export_time_start)
