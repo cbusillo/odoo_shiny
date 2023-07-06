@@ -46,9 +46,7 @@ class ShopifySync(models.AbstractModel):
                 shopify_updated_at = parse(shopify_product.updated_at).astimezone(tzutc())
 
                 # Search for the coresponding Odoo product using the SKU
-                odoo_product_product = self.env["product.product"].search(
-                    [("default_code", "=", (shopify_product.variants[0].sku or "").split("-")[0].strip())], limit=1
-                )
+                odoo_product_product = self.env["product.product"].search([("shopify_product_id", "=", shopify_product.id)], limit=1)
 
                 if odoo_product_product:
                     odoo_product_template = odoo_product_product.product_tmpl_id
