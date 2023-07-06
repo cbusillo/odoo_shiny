@@ -107,11 +107,13 @@ class ProductImport(models.Model):
     @api.onchange("mpn", "condition")
     def _onchange_mpn(self):
         if self.mpn and self.condition == "new":
-            is_new_record = isinstance(self.id, models.NewId)
+            is_new_record = isinstance(self.id, models.NewId)  # pylint: disable=no-member
             if is_new_record:
                 product_import_mpn = self.env["product.import"].search([("mpn", "=", self.mpn)], limit=1)
             else:
-                product_import_mpn = self.env["product.import"].search([("mpn", "=", self.mpn), ("id", "!=", self.id)], limit=1)
+                product_import_mpn = self.env["product.import"].search(
+                    [("mpn", "=", self.mpn), ("id", "!=", self.id)], limit=1  # pylint: disable=no-member
+                )
             product_template_mpn = self.env["product.template"].search([("mpn", "=", self.mpn)], limit=1)
 
             existing_sku = product_template_mpn.default_code or product_import_mpn.sku
@@ -198,8 +200,7 @@ class ProductImport(models.Model):
                     }
                 )
                 current_index += 1
-            # TODO: remove after testing
-            # record.unlink()
+            record.unlink()
         return {"type": "ir.actions.client", "tag": "reload"}
 
     def open_product_import_wizard(self):

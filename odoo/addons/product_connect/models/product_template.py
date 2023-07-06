@@ -1,7 +1,6 @@
 import re
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
-from odoo.osv import expression
 
 
 class ProductTemplate(models.Model):

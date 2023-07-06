@@ -2,9 +2,11 @@ import os
 import datetime
 import re
 import base64
+import time
 from dateutil.parser import parse
 from dateutil.tz import tzutc
 from pytz import utc
+import pyactiveresource.connection
 
 import shopify
 import requests
@@ -43,8 +45,10 @@ class ShopifySync(models.AbstractModel):
             for shopify_product in shopify_products:
                 shopify_updated_at = parse(shopify_product.updated_at).astimezone(tzutc())
 
-                # Search for the corxesponding Odoo product using the SKU
-                odoo_product_product = self.env["product.product"].search([("shopify_product_id", "=", shopify_product.id)], limit=1)
+                # Search for the coresponding Odoo product using the SKU
+                odoo_product_product = self.env["product.product"].search(
+                    [("default_code", "=", (shopify_product.variants[0].sku or "").split("-")[0].strip())], limit=1
+                )
 
                 if odoo_product_product:
                     odoo_product_template = odoo_product_product.product_tmpl_id
@@ -80,6 +84,7 @@ class ShopifySync(models.AbstractModel):
                 # If the product doesn't exist in Odoo yet, import it
                 elif not odoo_product_product:
                     self.import_shopify_product(shopify_product)
+                time.sleep(0.5)
 
             try:
                 shopify_products = shopify_products.next_page()
@@ -216,10 +221,9 @@ class ShopifySync(models.AbstractModel):
         # TODO: remove filter after testing single product
 
         for odoo_product in odoo_products:
-            if odoo_product.shopify_product_id:
+            try:
                 shopify_product = shopify.Product.find(odoo_product.shopify_product_id)
-            if not odoo_product.shopify_product_id:
-                # product doesn't exist in Shopify yet, so create a new one
+            except (pyactiveresource.connection.ResourceNotFound, AttributeError):
                 shopify_product = shopify.Product()
 
             # Set product data
@@ -276,5 +280,6 @@ class ShopifySync(models.AbstractModel):
                     odoo_product.product_tmpl_id.product_template_image_ids, key=lambda image: image.name, reverse=True
                 ):
                     self.export_product_image(shopify_product.id, odoo_image, odoo_image.name)
+            time.sleep(0.5)
 
         self.env["ir.config_parameter"].sudo().set_param("shopify.export_time_last", export_time_start.isoformat())
