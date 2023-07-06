@@ -235,8 +235,10 @@ class ShopifySync(models.AbstractModel):
             shopify_product.product_type = odoo_product.part_type.name if odoo_product.part_type else None
             shopify_product.status = "active" if odoo_product.is_published and odoo_product.qty_available > 0 else "draft"
 
-            # Create a variant for the product
-            variant = shopify.Variant()
+            if shopify_product.variants:
+                variant = shopify_product.variants[0]
+            else:
+                variant = shopify.Variant()
             variant.price = odoo_product.list_price
             variant.sku = f"{odoo_product.default_code} - {odoo_product.bin}"
             variant.barcode = odoo_product.mpn
