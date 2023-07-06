@@ -215,7 +215,8 @@ class ShopifySync(models.AbstractModel):
 
         # Get all products from Odoo
         odoo_products = self.env["product.product"].search([("write_date", ">", export_time_last)])
-        odoo_products = self.env["product.product"].search([("name", "ilike", "QL86C")])
+        odoo_products = self.env["product.product"].search([("default_code", ">=", "6124"), ("default_code", "<=", "6128")])
+
         # TODO: remove filter after testing single product
 
         for odoo_product in odoo_products:
