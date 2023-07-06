@@ -133,9 +133,9 @@
     </record>
 
     <!-- Menu item: accessible from the main menu -->
-    <menuitem id="menu_submenu_product_scraper" name="Products Scraper" parent="stock.menu_stock_root"/>
+    <menuitem id="menu_submenu_product_scraper" name="Product Scraper" parent="stock.menu_stock_root"/>
 
-    <menuitem id="menu_product_scraper" name="Products Scraper" action="action_product_scraper" parent="menu_submenu_product_scraper"/>
+    <menuitem id="menu_product_scraper" name="Product Scraper" action="action_product_scraper" parent="menu_submenu_product_scraper"/>
     <menuitem id="menu_product_scraper_url_state" name="Scraper URL State" action="action_product_scraper_url_state" parent="menu_submenu_product_scraper"/>
     <menuitem id="menu_product_scraper_source" name="Scraper Source" action="action_product_scraper_source" parent="menu_submenu_product_scraper"/>
     <menuitem id="menu_product_run_functions" name="Run functions" parent="menu_submenu_product_scraper"/>
