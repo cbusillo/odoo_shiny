@@ -264,15 +264,7 @@ class ShopifySync(models.AbstractModel):
                 condition_metafield.owner_id = shopify_product.id
                 condition_metafield.save()
 
-            if odoo_product.shopify_product_id:
-                odoo_product.write(
-                    {
-                        "shopify_last_exported": fields.Datetime.now(),
-                        "shopify_product_id": shopify_product.id,
-                    }
-                )
-
-            else:
+            if not odoo_product.shopify_product_id:
                 locations = shopify.Location.find()
                 location_id = locations[0].id
                 inventory_item_id = shopify_product.variants[0].inventory_item_id
@@ -282,6 +274,13 @@ class ShopifySync(models.AbstractModel):
                     odoo_product.product_tmpl_id.product_template_image_ids, key=lambda image: image.name, reverse=True
                 ):
                     self.export_product_image(shopify_product.id, odoo_image, odoo_image.name)
+
+            odoo_product.write(
+                {
+                    "shopify_last_exported": fields.Datetime.now(),
+                    "shopify_product_id": shopify_product.id,
+                }
+            )
             time.sleep(0.5)
 
         self.env["ir.config_parameter"].sudo().set_param("shopify.export_time_last", export_time_start.isoformat())
