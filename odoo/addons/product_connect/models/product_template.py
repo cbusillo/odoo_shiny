@@ -35,7 +35,7 @@ class ProductTemplate(models.Model):
     )
 
     def is_condition_valid(self, shopify_condition):
-        return shopify_condition in dict(self._fields["condition"].selection)
+        return shopify_condition in dict(self._fields["condition"].selection)  # pylint: disable=no-member
 
     @api.depends("description_sale", "product_scraper_html")
     def _compute_combined_description(self):

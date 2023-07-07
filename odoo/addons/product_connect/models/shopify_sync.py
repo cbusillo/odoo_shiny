@@ -216,9 +216,13 @@ class ShopifySync(models.AbstractModel):
         export_time_start = datetime.datetime.now(tzutc())
 
         # Get all products from Odoo
-        odoo_products = self.env["product.product"].search([("write_date", ">", export_time_last)])
-
-        # TODO: remove filter after testing single product
+        odoo_products = self.env["product.product"].search(
+            [
+                "|",
+                ("write_date", ">", export_time_last),
+                ("product_tmpl_id.write_date", ">", export_time_last),
+            ]
+        )
 
         for odoo_product in odoo_products:
             try:
