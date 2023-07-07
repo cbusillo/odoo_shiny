@@ -12,7 +12,7 @@
         </field>
     </record>
 
-    <!-- Product Import: Server Action-->
+    <!-- Product Import: Server Action: Import to Products -->
     <record id="server_action_product_import_to_products" model="ir.actions.server">
         <field name="name">Product Import</field>
         <field name="model_id" ref="model_product_import"/>
@@ -23,7 +23,17 @@
             action = records.import_to_products()
         </field>
     </record>
-
+    <!-- Product Import: Server Action: Print Bin Labels -->
+    <record id="server_action_product_import_print_bin_labels" model="ir.actions.server">
+        <field name="name">Print Bin Labels</field>
+        <field name="model_id" ref="model_product_import"/>
+        <field name="binding_model_id" ref="model_product_import"/>
+        <field name="binding_type">action</field>
+        <field name="state">code</field>
+        <field name="code">
+            action = records.print_bin_labels()
+        </field>
+    </record>
     <!-- Product Import: List View -->
     <record id="view_product_import_tree" model="ir.ui.view">
         <field name="name">product.import.tree</field>

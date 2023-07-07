@@ -1,9 +1,11 @@
 import re
+
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
+from .product_bin_label_mixin import ProductBinLabelMixin
 
 
-class ProductTemplate(models.Model):
+class ProductTemplate(models.Model, ProductBinLabelMixin):
     _inherit = "product.template"
 
     bin = fields.Char(index=True)

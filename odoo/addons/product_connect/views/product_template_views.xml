@@ -1,4 +1,16 @@
 <odoo>
+    <!-- Product Template: Server Action: Print Bin Labels -->
+    <record id="server_action_product_template_print_bin_labels" model="ir.actions.server">
+        <field name="name">Print Bin Labels</field>
+        <field name="model_id" ref="model_product_template"/>
+        <field name="binding_model_id" ref="model_product_template"/>
+        <field name="binding_type">action</field>
+        <field name="state">code</field>
+        <field name="code">
+            action = records.print_bin_labels()
+        </field>
+    </record>
+
     <!-- Product Template: Tree View -->
     <record id="view_product_template_tree_inherit" model="ir.ui.view">
         <field name="name">product.template.tree.inherit</field>

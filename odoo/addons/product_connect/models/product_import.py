@@ -1,7 +1,9 @@
 import base64
 import logging
 import requests
-from odoo import fields, models, api, exceptions
+from odoo import fields, models, api, _
+from odoo.exceptions import UserError
+from .product_bin_label_mixin import ProductBinLabelMixin
 
 _logger = logging.getLogger(__name__)
 
@@ -24,7 +26,7 @@ class ProductImportImage(models.Model):
     product_id = fields.Many2one("product.import", ondelete="cascade")
 
 
-class ProductImport(models.Model):
+class ProductImport(models.Model, ProductBinLabelMixin):
     _name = "product.import"
     _description = "Product Import"
     _sql_constraints = [
@@ -104,21 +106,58 @@ class ProductImport(models.Model):
             self.image_ids |= image
             self.image_upload = False
 
-    @api.onchange("mpn", "condition")
-    def _onchange_mpn(self):
-        if self.mpn and self.condition == "new":
-            is_new_record = isinstance(self.id, models.NewId)  # pylint: disable=no-member
-            if is_new_record:
-                product_import_mpn = self.env["product.import"].search([("mpn", "=", self.mpn)], limit=1)
-            else:
-                product_import_mpn = self.env["product.import"].search(
-                    [("mpn", "=", self.mpn), ("id", "!=", self.id)], limit=1  # pylint: disable=no-member
-                )
-            product_template_mpn = self.env["product.template"].search([("mpn", "=", self.mpn)], limit=1)
-
-            existing_sku = product_template_mpn.default_code or product_import_mpn.sku
+    @api.onchange("sku", "mpn", "condition", "bin")
+    def _onchange_product_details(self):
+        if self._origin.mpn != self.mpn or self._origin.condition != self.condition:
+            existing_sku = self._sku_from_mpn_condition_new()
             if existing_sku:
-                raise exceptions.UserError(f"A product with the same MPN already exists.  Its SKU is {existing_sku}")
+                raise UserError(f"A product with the same MPN already exists.  Its SKU is {existing_sku}")
+        if self._origin.bin != self.bin and self.bin:
+            if self._existing_bin() is False:
+                self._print_bin_label()
+        if self.sku and self.mpn and self.condition:
+            self._print_product_label()
+
+    def _sku_from_existing_record(self, field_name: str, field_value: str) -> str | None:
+        is_new_record = isinstance(self.id, models.NewId)  # pylint: disable=no-member
+        if is_new_record:
+            product_import_mpn = self.env["product.import"].search([(field_name, "=", field_value)], limit=1)
+        else:
+            product_import_mpn = self.env["product.import"].search(
+                [(field_name, "=", field_value), ("id", "!=", self.id)], limit=1  # pylint: disable=no-member
+            )
+        product_template_mpn = self.env["product.template"].search([(field_name, "=", field_value)], limit=1)
+
+        return product_template_mpn.default_code or product_import_mpn.sku
+
+    def _sku_from_mpn_condition_new(self) -> str:
+        if self.mpn and self.condition == "new":
+            existing_sku = self._sku_from_existing_record("mpn", self.mpn)
+            if existing_sku:
+                return existing_sku
+            return None
+
+    def _existing_bin(self) -> bool:
+        if self.bin:
+            existing_sku = self._sku_from_existing_record("bin", self.bin)
+            if existing_sku:
+                return True
+        return False
+
+    def _print_product_label(self):
+        label_data = [
+            f"SKU: {self.sku}",
+            "MPN: ",
+            self.mpn,
+            f"Bin: {self.bin or '       '}",
+            self.condition.title(),
+        ]
+        label = self.env["printnode.interface"].generate_label(label_data, self.sku)
+        self.env["printnode.interface"].print_label(label)
+
+    def _print_bin_label(self):
+        label = self.env["printnode.interface"].generate_label(["", "Bin:", self.bin], self.bin)
+        self.env["printnode.interface"].print_label(label)
 
     def open_record(self):
         self.ensure_one()
@@ -137,8 +176,7 @@ class ProductImport(models.Model):
             response.raise_for_status()
             image_base64 = base64.b64encode(response.content)
         except requests.exceptions.RequestException as error:
-            _logger.warning("Error getting image from URL %s: %s", url, error)
-            return False
+            raise UserError(_("Error getting image from SKU: %s", self.sku)) from error
         return image_base64
 
     def import_to_products(self):

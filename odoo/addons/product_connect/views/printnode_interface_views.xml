@@ -4,21 +4,10 @@
         <field name="name">printnode.interface.tree</field>
         <field name="model">printnode.interface</field>
         <field name="arch" type="xml">
-            <tree string="PrintNode Interface">
+            <tree string="PrintNode Interface" editable="bottom">
                 <field name="user_id"/>
                 <field name="printer_selection"/>
             </tree>
-        </field>
-    </record>
-    <!-- Printnode Interface: Form View-->
-    <record id="view_printnode_interface_form" model="ir.ui.view">
-        <field name="name">printnode.interface.form</field>
-        <field name="model">printnode.interface</field>
-        <field name="arch" type="xml">
-            <form string="PrintNode Interface">
-                <field name="user_id"></field>
-                <field name="printer_selection"/>
-            </form>
         </field>
     </record>
 
@@ -26,7 +15,8 @@
     <record id="action_print_node_interface" model="ir.actions.act_window">
         <field name="name">PrintNode Interface</field>
         <field name="res_model">printnode.interface</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree</field>
+        <field name="context">{'group_by': 'user_id' }</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
             Click on Create to add a new PrintNode Interface.
