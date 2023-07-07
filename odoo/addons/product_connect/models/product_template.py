@@ -34,6 +34,9 @@ class ProductTemplate(models.Model):
         related="product_variant_ids.shopify_product_id", string="Shopify Product ID", readonly=True, store=True
     )
 
+    def is_condition_valid(self, shopify_condition):
+        return shopify_condition in dict(self._fields["condition"].selection)
+
     @api.depends("description_sale", "product_scraper_html")
     def _compute_combined_description(self):
         for record in self:
