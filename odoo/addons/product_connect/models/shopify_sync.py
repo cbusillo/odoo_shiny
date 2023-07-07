@@ -249,22 +249,23 @@ class ShopifySync(models.AbstractModel):
 
             shopify_product.save()  # returns False if the record couldn't be saved
             metafields = shopify.Metafield.find(owner_resource="product", owner_id=shopify_product.id)
-            condition_metafield = next((mf for mf in metafields if mf.key == "condition"), None)
+            if hasattr(odoo_product, "condition"):
+                condition_metafield = next((mf for mf in metafields if mf.key == "condition"), None)
 
-            if condition_metafield:
-                # Update existing metafield
-                condition_metafield.value = odoo_product.condition
-                condition_metafield.save()
-            else:
-                # Create new metafield
-                condition_metafield = shopify.Metafield()
-                condition_metafield.key = "condition"
-                condition_metafield.value = odoo_product.condition
-                condition_metafield.type = "single_line_text_field"
-                condition_metafield.namespace = "custom"
-                condition_metafield.owner_resource = "product"
-                condition_metafield.owner_id = shopify_product.id
-                condition_metafield.save()
+                if condition_metafield:
+                    # Update existing metafield
+                    condition_metafield.value = odoo_product.condition
+                    condition_metafield.save()
+                else:
+                    # Create new metafield
+                    condition_metafield = shopify.Metafield()
+                    condition_metafield.key = "condition"
+                    condition_metafield.value = odoo_product.condition
+                    condition_metafield.type = "single_line_text_field"
+                    condition_metafield.namespace = "custom"
+                    condition_metafield.owner_resource = "product"
+                    condition_metafield.owner_id = shopify_product.id
+                    condition_metafield.save()
 
             if not odoo_product.shopify_product_id:
                 locations = shopify.Location.find()
