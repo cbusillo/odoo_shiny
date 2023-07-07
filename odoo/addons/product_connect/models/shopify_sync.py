@@ -235,7 +235,7 @@ class ShopifySync(models.AbstractModel):
             shopify_product.product_type = odoo_product.part_type.name if odoo_product.part_type else None
             shopify_product.status = "active" if odoo_product.is_published and odoo_product.qty_available > 0 else "draft"
 
-            if shopify_product.variants:
+            if hasattr(shopify_product, "variants") and shopify_product.variants:
                 variant = shopify_product.variants[0]
             else:
                 variant = shopify.Variant()
