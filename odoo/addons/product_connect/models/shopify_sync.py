@@ -141,7 +141,9 @@ class ShopifySync(models.AbstractModel):
             "detailed_type": "product",
             "is_published": True if shopify_product.status.lower() == "active" else False,
             "manufacturer": manufacturer.id if manufacturer else None,
-            "condition": shopify_condition if self.product_tmpl_id.is_condition_valid(shopify_condition) else odoo_product.condition,
+            "condition": shopify_condition
+            if odoo_product.product_tmpl_id.is_condition_valid(shopify_condition)
+            else odoo_product.condition,
             "shopify_product_id": shopify_product.id,
             "part_type": part_type.id if part_type else None,
         }
