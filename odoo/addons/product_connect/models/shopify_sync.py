@@ -213,9 +213,9 @@ class ShopifySync(models.AbstractModel):
         # Setup Shopify API
 
         export_time_last_str = self.env["ir.config_parameter"].sudo().get_param("shopify.export_time_last")
-        export_time_last = datetime.strptime(export_time_last_str, "%Y-%m-%d %H:%M:%S")
+        export_time_last = datetime.strptime(export_time_last_str, "%Y-%m-%dT%H:%M:%S.%f%z")
         export_time_last = export_time_last - timedelta(minutes=30)
-        export_time_last_str = export_time_last.strftime("%Y-%m-%d %H:%M:%S")
+        export_time_last_str = export_time_last.strftime("%Y-%m-%dT%H:%M:%S.%f%z")
         export_time_start = datetime.now(tzutc())
 
         # Get all products from Odoo
