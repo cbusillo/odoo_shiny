@@ -36,6 +36,7 @@ class ProductImport(models.Model, ProductBinLabelMixin):
     sku = fields.Char(string="SKU", required=True, copy=False, index=True, default=lambda self: "New")
     mpn = fields.Char(string="MPN", index=True)
     manufacturer = fields.Many2one("product.manufacturer", index=True)
+    manufacturer_barcode = fields.Char(index=True)
     quantity = fields.Integer()
     bin = fields.Char(index=True)
     name = fields.Char(index=True)
@@ -112,38 +113,49 @@ class ProductImport(models.Model, ProductBinLabelMixin):
     @api.onchange("sku", "mpn", "condition", "bin")
     def _onchange_product_details(self):
         if self._origin.mpn != self.mpn or self._origin.condition != self.condition:
-            existing_sku = self._sku_from_mpn_condition_new()
-            if existing_sku:
-                raise UserError(f"A product with the same MPN already exists.  Its SKU is {existing_sku}")
+            existing_products = self._products_from_mpn_condition_new()
+            if existing_products:
+                existing_products_display = [f"{product['sku']} - {product['bin']}" for product in existing_products]
+                raise UserError(f"A product with the same MPN already exists.  Its SKU is/are {existing_products_display}")
         if self._origin.bin != self.bin and self.bin:
             if self._existing_bin() is False:
                 self._print_bin_label()
         if self.sku and self.mpn and self.condition:
             self._print_product_label()
 
-    def _sku_from_existing_record(self, field_name: str, field_value: str) -> str | None:
+    def _products_from_existing_records(self, field_name: str, field_value: str) -> str | None:
         is_new_record = isinstance(self.id, models.NewId)  # pylint: disable=no-member
         if is_new_record:
-            product_import_mpn = self.env["product.import"].search([(field_name, "=", field_value)], limit=1)
+            product_imports = self.env["product.import"].search([(field_name, "=", field_value)])
         else:
-            product_import_mpn = self.env["product.import"].search(
-                [(field_name, "=", field_value), ("id", "!=", self.id)], limit=1  # pylint: disable=no-member
+            product_imports = self.env["product.import"].search(
+                [(field_name, "=", field_value), ("id", "!=", self.id)]  # pylint: disable=no-member
             )
-        product_template_mpn = self.env["product.template"].search([(field_name, "=", field_value)], limit=1)
+        product_templates = self.env["product.template"].search([(field_name, "=", field_value)])
 
-        return product_template_mpn.default_code or product_import_mpn.sku
+        existing_products = {}
+        for product in product_imports:
+            product_to_add = {"sku": product.sku, "bin": product.bin, "condition": product.condition}
+            existing_products[product.sku] = product_to_add
 
-    def _sku_from_mpn_condition_new(self) -> str:
+        for product in product_templates:
+            product_to_add = {"sku": product.default_code, "bin": product.bin, "condition": product.condition}
+            existing_products[product.default_code] = product_to_add
+
+        return list(existing_products.values())
+
+    def _products_from_mpn_condition_new(self) -> str:
         if self.mpn and self.condition == "new":
-            existing_sku = self._sku_from_existing_record("mpn", self.mpn)
-            if existing_sku:
-                return existing_sku
+            existing_products = self._products_from_existing_records("mpn", self.mpn)
+            existing_new_products = [product for product in existing_products if product["condition"] == "new"]
+            if existing_new_products:
+                return existing_new_products
             return None
 
     def _existing_bin(self) -> bool:
         if self.bin:
-            existing_sku = self._sku_from_existing_record("bin", self.bin)
-            if existing_sku:
+            existing_products = self._products_from_existing_records("bin", self.bin)
+            if existing_products:
                 return True
         return False
 
@@ -188,6 +200,10 @@ class ProductImport(models.Model, ProductBinLabelMixin):
             _logger.warning("Missing data for records: %s", missing_data_records)
 
         for record in self - missing_data_records:
+            existing_products = self._products_from_mpn_condition_new()
+            if existing_products:
+                existing_products_display = [f"{product['sku']} - {product['bin']}" for product in existing_products]
+                raise UserError(f"A product with the same MPN already exists.  Its SKU is/are {existing_products_display}")
             product = self.env["product.product"].search([("default_code", "=", record.sku)], limit=1)
 
             product_data = {
@@ -205,6 +221,7 @@ class ProductImport(models.Model, ProductBinLabelMixin):
                 "detailed_type": "product",
                 "is_published": True,
                 "shopify_next_export": True,
+                "manufacturer_barcode": record.manufacturer_barcode or product.manufacturer_barcode,
             }
             if record.name is None:
                 continue

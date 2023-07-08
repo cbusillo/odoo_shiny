@@ -35,6 +35,7 @@
                 <field name="manufacturer" />
                 <field name="part_type" />
                 <field name="mpn" />
+                <field name="manufacturer_barcode" />
                 <field name="bin" />
                 <field name="shopify_product_id"/>
 

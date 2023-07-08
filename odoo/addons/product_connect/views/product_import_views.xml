@@ -40,10 +40,11 @@
         <field name="model">product.import</field>
         <field name="arch" type="xml">
             <tree string="Product Import" editable="bottom">
-                <field name="sku"/>
+                <field name="sku" readonly="0"/>
                 <field name="condition"/>
-                <field name="mpn"/>
+                <field name="manufacturer_barcode"/>
                 <field name="manufacturer"/>
+                <field name="mpn"/>
                 <field name="quantity" sum="Total Quantity"/>
                 <field name="bin"/>
                 <field name="name"/>
@@ -56,6 +57,7 @@
                 <field name="image_ids"/>
                 <field name="image_upload" widget="file_drop"/>
                 <button name="open_record" type="object" string="Open"/>
+                <field name="sku" readonly="1"/>
             </tree>
         </field>
     </record>
