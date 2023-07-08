@@ -212,9 +212,12 @@ class ShopifySync(models.AbstractModel):
     def export_to_shopify(self):
         # Setup Shopify API
 
+        import_time_last_str = self.env["ir.config_parameter"].sudo().get_param("shopify.import_time_last")
+        import_time_last = parse(import_time_last_str).astimezone(tzutc())
+
         export_time_last_str = self.env["ir.config_parameter"].sudo().get_param("shopify.export_time_last")
         export_time_last = datetime.strptime(export_time_last_str, "%Y-%m-%dT%H:%M:%S.%f%z")
-        export_time_last = export_time_last - timedelta(minutes=30)
+        export_time_last = export_time_last - timedelta(minutes=5)
         export_time_last_str = export_time_last.strftime("%Y-%m-%dT%H:%M:%S.%f%z")
         export_time_start = datetime.now(tzutc())
 
@@ -228,6 +231,17 @@ class ShopifySync(models.AbstractModel):
         )
 
         for odoo_product in odoo_products:
+            odoo_product_product_write_date = odoo_product.write_date.replace(tzinfo=utc) if odoo_product.write_date else None
+            odoo_product_template_write_date = (
+                odoo_product.product_tmpl_id.write_date.replace(tzinfo=utc) if odoo_product.product_tmpl_id.write_date else None
+            )
+            if (
+                not odoo_product_product_write_date
+                or not odoo_product_template_write_date
+                or odoo_product_product_write_date > import_time_last
+                or odoo_product_template_write_date > import_time_last
+            ):
+                continue
             try:
                 if odoo_product.shopify_product_id:
                     shopify_product = shopify.Product.find(odoo_product.shopify_product_id)
