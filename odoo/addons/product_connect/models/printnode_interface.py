@@ -43,18 +43,21 @@ class PrintNodeInterface(models.Model):
     @api.model
     def print_label(self, label: base64, quantity: int = 1):
         gateway = self.get_gateway()
-        user_printer = self.env["printnode.interface"].search([("user_id", "=", self.env.user.id)], limit=1)
-        if user_printer:
-            printer_id = user_printer.printer_selection
-            print_job = gateway.PrintJob(
-                printer=int(printer_id),
-                job_type="raw",
-                title="Odoo Product Label",
-                options={"copies": quantity},
-                base64=label,
-            )
-            return print_job
-        raise UserError(_("No printer selected"))
+        user = self.env["printnode.interface"].search([("user_id", "=", self.env.user.id)], limit=1)
+        if not user:
+            return False
+        printer = user.printer_selection
+        if not printer:
+            return False
+
+        print_job = gateway.PrintJob(
+            printer=int(printer),
+            job_type="raw",
+            title="Odoo Product Label",
+            options={"copies": quantity},
+            base64=label,
+        )
+        return print_job
 
     def generate_label(
         self,
@@ -74,9 +77,14 @@ class PrintNodeInterface(models.Model):
         quantity = max(int(quantity), 1)
         label = ZPLDocument()
         label.add_zpl_raw("^BY2")
-        label.add_default_font(font_name=0, character_height=label_text_size, character_width=label_text_size)
+
         current_origin = self.LABEL_PADDING_Y
         for index, line in enumerate(text):
+            current_line_text_size = (
+                self.LABEL_TEXT_SIZE["small"] if line.startswith("(SM)") and len(line.replace("(SM)", "")) > 8 else label_text_size
+            )
+            line = line.replace("(SM)", "")
+            label.add_default_font(font_name=0, character_height=current_line_text_size, character_width=current_line_text_size)
             label.add_field_block(text_justification="C", width=label_width)
             label.add_field_origin(x_pos=self.LABEL_PADDING_X, y_pos=current_origin, justification=2)
             label.add_field_data(line)

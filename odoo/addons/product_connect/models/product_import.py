@@ -163,7 +163,7 @@ class ProductImport(models.Model, ProductBinLabelMixin):
         label_data = [
             f"SKU: {self.sku}",
             "MPN: ",
-            self.mpn,
+            f"(SM){self.mpn}",
             f"Bin: {self.bin or '       '}",
             self.condition.title(),
         ]
