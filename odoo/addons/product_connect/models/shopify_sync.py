@@ -5,6 +5,7 @@ import base64
 import time
 from dateutil.parser import parse
 from dateutil.tz import tzutc
+from datetime import datetime, timedelta
 from pytz import utc
 import pyactiveresource.connection
 
@@ -212,15 +213,18 @@ class ShopifySync(models.AbstractModel):
     def export_to_shopify(self):
         # Setup Shopify API
 
-        export_time_last = self.env["ir.config_parameter"].sudo().get_param("shopify.export_time_last")
+        export_time_last_str = self.env["ir.config_parameter"].sudo().get_param("shopify.export_time_last")
+        export_time_last = datetime.strptime(export_time_last_str, "%Y-%m-%d %H:%M:%S")
+        export_time_last = export_time_last - timedelta(minutes=20)
+        export_time_last_str = export_time_last.strftime("%Y-%m-%d %H:%M:%S")
         export_time_start = datetime.datetime.now(tzutc())
 
         # Get all products from Odoo
         odoo_products = self.env["product.product"].search(
             [
                 "|",
-                ("write_date", ">", export_time_last),
-                ("product_tmpl_id.write_date", ">", export_time_last),
+                ("write_date", ">", export_time_last_str),
+                ("product_tmpl_id.write_date", ">", export_time_last_str),
             ]
         )
 
