@@ -22,6 +22,12 @@
         "views/product_template_views.xml",
         "views/website_product_template.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "product_connect/static/src/js/file_drop_widget.js",
+            "product_connect/static/src/css/file_drop_widget.css",
+        ],
+    },
     "installable": True,
     "application": True,
     "license": "LGPL-3",

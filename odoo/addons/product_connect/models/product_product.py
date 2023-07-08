@@ -9,6 +9,7 @@ class ProductProduct(models.Model):
 
     shopify_product_id = fields.Char(copy=False)
     shopify_last_exported = fields.Datetime(string="Last Exported Time")
+    shopify_next_export = fields.Boolean(string="Export Next Sync?")
 
     def update_quantity(self, quantity):
         stock_location = self.env.ref("stock.stock_location_stock")

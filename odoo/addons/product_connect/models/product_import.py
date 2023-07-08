@@ -3,7 +3,7 @@ import logging
 import requests
 from odoo import fields, models, api, _
 from odoo.exceptions import UserError
-from .product_bin_label_mixin import ProductBinLabelMixin
+from ..mixins.product_bin_label import ProductBinLabelMixin
 
 _logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class ProductImport(models.Model, ProductBinLabelMixin):
     price = fields.Float()
     cost = fields.Float()
     image_1_url = fields.Char(string="Image 1 URL")
-    image_upload = fields.Image(max_width=1920, max_height=1920)
+    image_upload = fields.Binary()
     image_ids = fields.One2many("product.import.image", "product_id")
     condition = fields.Selection(
         [
@@ -57,6 +57,7 @@ class ProductImport(models.Model, ProductBinLabelMixin):
         ],
         default="used",
     )
+    export_to_shopify = fields.Binary()
 
     def name_get(self):
         result = []
@@ -201,6 +202,7 @@ class ProductImport(models.Model, ProductBinLabelMixin):
                 "condition": record.condition or product.condition,
                 "detailed_type": "product",
                 "is_published": True,
+                "shopify_next_export": True,
             }
             if record.name is None:
                 continue

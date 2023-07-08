@@ -9,5 +9,7 @@ class ProductBinLabelMixin(models.AbstractModel):
         unique_bins = list(set(self.mapped("bin")))
         unique_bins.sort()
         for product_bin in unique_bins:
+            if product_bin.strip().lower() in ["", " ", "back"]:
+                continue
             label = self.env["printnode.interface"].generate_label(["", "Bin: ", product_bin], product_bin)
             self.env["printnode.interface"].print_label(label)
