@@ -113,7 +113,7 @@ class ProductImport(models.Model, ProductBinLabelMixin):
     @api.onchange("sku", "mpn", "condition", "bin")
     def _onchange_product_details(self):
         if self._origin.mpn != self.mpn or self._origin.condition != self.condition:
-            existing_products = self._products_from_mpn_condition_new()
+            existing_products = self.products_from_mpn_condition_new()
             if existing_products:
                 existing_products_display = [f"{product['sku']} - {product['bin']}" for product in existing_products]
                 raise UserError(f"A product with the same MPN already exists.  Its SKU is/are {existing_products_display}")
@@ -144,13 +144,13 @@ class ProductImport(models.Model, ProductBinLabelMixin):
 
         return list(existing_products.values())
 
-    def _products_from_mpn_condition_new(self) -> str:
+    def products_from_mpn_condition_new(self) -> str:
         if self.mpn and self.condition == "new":
             existing_products = self._products_from_existing_records("mpn", self.mpn)
             existing_new_products = [product for product in existing_products if product["condition"] == "new"]
             if existing_new_products:
                 return existing_new_products
-            return None
+        return None
 
     def _existing_bin(self) -> bool:
         if self.bin:
@@ -200,7 +200,7 @@ class ProductImport(models.Model, ProductBinLabelMixin):
             _logger.warning("Missing data for records: %s", missing_data_records)
 
         for record in self - missing_data_records:
-            existing_products = self._products_from_mpn_condition_new()
+            existing_products = record._products_from_mpn_condition_new()
             if existing_products:
                 existing_products_display = [f"{product['sku']} - {product['bin']}" for product in existing_products]
                 raise UserError(f"A product with the same MPN already exists.  Its SKU is/are {existing_products_display}")
@@ -223,8 +223,7 @@ class ProductImport(models.Model, ProductBinLabelMixin):
                 "shopify_next_export": True,
                 "manufacturer_barcode": record.manufacturer_barcode or product.manufacturer_barcode,
             }
-            if record.name is None:
-                continue
+
             if product:
                 product.write(product_data)
             else:
