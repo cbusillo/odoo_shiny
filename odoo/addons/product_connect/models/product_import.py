@@ -200,7 +200,7 @@ class ProductImport(models.Model, ProductBinLabelMixin):
             _logger.warning("Missing data for records: %s", missing_data_records)
 
         for record in self - missing_data_records:
-            existing_products = record._products_from_mpn_condition_new()
+            existing_products = record.products_from_mpn_condition_new()
             if existing_products:
                 existing_products_display = [f"{product['sku']} - {product['bin']}" for product in existing_products]
                 raise UserError(f"A product with the same MPN already exists.  Its SKU is/are {existing_products_display}")
