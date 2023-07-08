@@ -235,12 +235,7 @@ class ShopifySync(models.AbstractModel):
             odoo_product_template_write_date = (
                 odoo_product.product_tmpl_id.write_date.replace(tzinfo=utc) if odoo_product.product_tmpl_id.write_date else None
             )
-            if (
-                not odoo_product_product_write_date
-                or not odoo_product_template_write_date
-                or odoo_product_product_write_date > import_time_last
-                or odoo_product_template_write_date > import_time_last
-            ):
+            if odoo_product_product_write_date < import_time_last or odoo_product_template_write_date < import_time_last:
                 continue
             try:
                 if odoo_product.shopify_product_id:
