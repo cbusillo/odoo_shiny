@@ -54,7 +54,7 @@
                 <field name="cost"/>
                 <field name="image_1_url"/>
                 <field name="image_ids"/>
-                <field name="image_upload"/>
+                <field name="image_upload" widget="file_drop"/>
                 <button name="open_record" type="object" string="Open"/>
             </tree>
         </field>

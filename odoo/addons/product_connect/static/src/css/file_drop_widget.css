@@ -1,6 +1,7 @@
 .drag-over {
-    cursor: copy;
-    /* The 'copy' cursor type will show a little '+' sign next to the cursor, signaling that the user can drop their files */
     background-color: #f0f0f0;
-    /* Change the background color to highlight the drop area */
+    border: 2px dashed #000;
+    /* Add a border */
+    transition: all 0.5s ease;
+    /* Add transition for smoothness */
 }

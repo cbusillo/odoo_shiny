@@ -97,6 +97,8 @@ class ProductImport(models.Model, ProductBinLabelMixin):
 
     @api.onchange("image_upload")
     def _onchange_image_upload(self):
+        # image_data = base64.b64decode(self.image_upload)  # convert base64 to binary
+
         if self.image_upload:
             image = self.env["product.import.image"].create(
                 {
