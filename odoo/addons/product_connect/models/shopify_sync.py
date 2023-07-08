@@ -1,11 +1,10 @@
 import os
-import datetime
+from datetime import datetime, timedelta
 import re
 import base64
 import time
 from dateutil.parser import parse
 from dateutil.tz import tzutc
-from datetime import datetime, timedelta
 from pytz import utc
 import pyactiveresource.connection
 
@@ -38,7 +37,7 @@ class ShopifySync(models.AbstractModel):
     def import_from_shopify(self):
         import_time_last_str = self.env["ir.config_parameter"].sudo().get_param("shopify.import_time_last")
 
-        import_time_start = datetime.datetime.now(tzutc())
+        import_time_start = datetime.now(tzutc())
         import_time_last = parse(import_time_last_str).astimezone(tzutc())
         shopify_products = shopify.Product.find(updated_at_min=import_time_last_str)
 
@@ -63,7 +62,7 @@ class ShopifySync(models.AbstractModel):
                         else None
                     )
                     if import_time_last.year < 2001:
-                        latest_write_date = datetime.datetime(2000, 1, 1, tzinfo=utc)
+                        latest_write_date = datetime(2000, 1, 1, tzinfo=utc)
                     else:
                         latest_write_date = max(
                             filter(
@@ -215,9 +214,9 @@ class ShopifySync(models.AbstractModel):
 
         export_time_last_str = self.env["ir.config_parameter"].sudo().get_param("shopify.export_time_last")
         export_time_last = datetime.strptime(export_time_last_str, "%Y-%m-%d %H:%M:%S")
-        export_time_last = export_time_last - timedelta(minutes=20)
+        export_time_last = export_time_last - timedelta(minutes=30)
         export_time_last_str = export_time_last.strftime("%Y-%m-%d %H:%M:%S")
-        export_time_start = datetime.datetime.now(tzutc())
+        export_time_start = datetime.now(tzutc())
 
         # Get all products from Odoo
         odoo_products = self.env["product.product"].search(
