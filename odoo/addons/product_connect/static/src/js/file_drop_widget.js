@@ -15,7 +15,9 @@ export class FileDropWidget extends Component {
         ev.stopPropagation();
         if (ev.dataTransfer) {
             const { files } = ev.dataTransfer;
-            [...files].forEach(file => {
+            const sortedFiles = [...files].sort((a, b) => a.name.localeCompare(b.name));
+            sortedFiles.forEach(file => {
+
                 const reader = new FileReader();
                 reader.onload = async (e) => {
                     const { result } = e.target;
