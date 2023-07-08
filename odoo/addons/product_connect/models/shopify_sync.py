@@ -289,6 +289,7 @@ class ShopifySync(models.AbstractModel):
                 {
                     "shopify_last_exported": fields.Datetime.now(),
                     "shopify_product_id": shopify_product.id,
+                    "shopify_next_export": False,
                 }
             )
             time.sleep(0.5)
