@@ -47,6 +47,7 @@
                 <field name="mpn"/>
                 <field name="quantity" sum="Total Quantity"/>
                 <field name="bin"/>
+                <field name="lot_number"/>
                 <field name="name"/>
                 <field name="description"/>
                 <field name="type"/>

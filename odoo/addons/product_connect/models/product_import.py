@@ -39,6 +39,7 @@ class ProductImport(models.Model, ProductBinLabelMixin):
     manufacturer_barcode = fields.Char(index=True)
     quantity = fields.Integer()
     bin = fields.Char(index=True)
+    lot_number = fields.Char(index=True)
     name = fields.Char(index=True)
     description = fields.Char()
     type = fields.Many2one("product.type", index=True)
@@ -222,6 +223,7 @@ class ProductImport(models.Model, ProductBinLabelMixin):
                 "is_published": True,
                 "shopify_next_export": True,
                 "manufacturer_barcode": record.manufacturer_barcode or product.manufacturer_barcode,
+                "lot_number": record.lot_number or product.lot_number,
             }
 
             if product:
@@ -270,3 +272,7 @@ class ProductImport(models.Model, ProductBinLabelMixin):
             "target": "new",
             "context": {"default_selected_product_ids": self.ids},
         }
+
+    def fill_down(self):
+        for record in self:
+            print(record)

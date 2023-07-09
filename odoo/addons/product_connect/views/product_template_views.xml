@@ -37,6 +37,7 @@
                 <field name="mpn" />
                 <field name="manufacturer_barcode" />
                 <field name="bin" />
+                <field name="lot_number"/>
                 <field name="shopify_product_id"/>
 
             </field>

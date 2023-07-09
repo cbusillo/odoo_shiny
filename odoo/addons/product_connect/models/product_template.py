@@ -10,6 +10,7 @@ class ProductTemplate(models.Model, ProductBinLabelMixin):
 
     bin = fields.Char(index=True)
     mpn = fields.Char(string="MPN", index=True)
+    lot_number = fields.Char(index=True)
     manufacturer = fields.Many2one("product.manufacturer", index=True)
     manufacturer_barcode = fields.Char(index=True)
     part_type = fields.Many2one("product.type", index=True)
