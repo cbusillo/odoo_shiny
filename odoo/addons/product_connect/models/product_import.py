@@ -272,7 +272,3 @@ class ProductImport(models.Model, ProductBinLabelMixin):
             "target": "new",
             "context": {"default_selected_product_ids": self.ids},
         }
-
-    def fill_down(self):
-        for record in self:
-            print(record)

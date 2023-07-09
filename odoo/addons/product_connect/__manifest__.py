@@ -8,7 +8,7 @@
     "author": "Chris Busillo",
     "company": "Shiny Computers",
     "website": "https://www.shinycomputers.com",
-    "depends": ["base", "product", "web", "website_sale"],
+    "depends": ["base", "product", "web", "website_sale", "odoo_shift_key_selection"],
     "description": "Module to scrape websites for model data.",
     "data": [
         "data/res_config_data.xml",
@@ -26,6 +26,7 @@
         "web.assets_backend": [
             "product_connect/static/src/js/file_drop_widget.js",
             "product_connect/static/src/css/file_drop_widget.css",
+            "product_connect/static/src/js/list_fill_down.js",
         ],
     },
     "installable": True,
