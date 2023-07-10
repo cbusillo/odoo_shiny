@@ -39,7 +39,7 @@
         <field name="name">product.import.tree</field>
         <field name="model">product.import</field>
         <field name="arch" type="xml">
-            <tree string="Product Import" editable="bottom">
+            <tree string="Product Import" editable="bottom" multi_edit="1">
                 <field name="sku" readonly="0"/>
                 <field name="condition"/>
                 <field name="manufacturer_barcode"/>
