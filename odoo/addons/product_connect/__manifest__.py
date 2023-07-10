@@ -26,7 +26,7 @@
         "web.assets_backend": [
             "product_connect/static/src/js/file_drop_widget.js",
             "product_connect/static/src/css/file_drop_widget.css",
-            "product_connect/static/src/js/list_fill_down.js",
+            "product_connect/static/src/js/list_fill_selected_fields.js",
         ],
     },
     "installable": True,

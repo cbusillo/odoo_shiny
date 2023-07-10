@@ -12,17 +12,30 @@ patch(ListRenderer.prototype, 'product_connect.ListRenderer', {
   // Add a lifecycle hook to add the event listener
   setup() {
     this._super.apply(this, arguments);
-    useExternalListener(window, 'keydown', this.fillDown);
+    useExternalListener(window, 'keydown', this.fillSelected);
+    useExternalListener(window, 'click', this.onFieldClick);
+  },
+
+  onFieldClick(ev) {
+    const fieldOuterHTML = ev.target.outerHTML
+    const regex = /name="(\S*)"/;
+    const clickedFieldName = fieldOuterHTML.match(regex);
+    if (clickedFieldName) {
+      this.clickedFieldName = clickedFieldName[1];
+    }
   },
 
 
-
-  async fillDown(ev) {
+  async fillSelected(ev) {
     if (ev.key.toLowerCase() !== 'f' || !ev.shiftKey || !ev.metaKey) {
       return;
     }
     const activeRecordId = this.props.list.editedRecord.resId;
-    const activeField = this.activeElement.activeElement.parentElement.attributes.name.value;
+    let activeField = this.activeElement?.activeElement?.parentElement?.attributes?.name?.value;
+    if (!activeField) {
+      activeField = this.clickedFieldName;
+    }
+
     if (!activeField || !activeRecordId) {
       return;
     }
@@ -37,7 +50,7 @@ patch(ListRenderer.prototype, 'product_connect.ListRenderer', {
     const rpc = this.env.services.rpc;
     await rpc('/web/dataset/call_kw', {
       model: 'ir.model',
-      method: 'fill_down',
+      method: 'fill_selected_fields',
       args: [[],
         modelName,
         activeField,
