@@ -12,17 +12,6 @@
         </field>
     </record>
 
-    <!-- Product Import: Server Action: Import to Products -->
-    <record id="server_action_product_import_to_products" model="ir.actions.server">
-        <field name="name">Product Import</field>
-        <field name="model_id" ref="model_product_import"/>
-        <field name="binding_model_id" ref="model_product_import"/>
-        <field name="binding_type">action</field>
-        <field name="state">code</field>
-        <field name="code">
-            action = records.import_to_products()
-        </field>
-    </record>
     <!-- Product Import: Server Action: Print Bin Labels -->
     <record id="server_action_product_import_print_bin_labels" model="ir.actions.server">
         <field name="name">Print Bin Labels</field>
@@ -40,6 +29,9 @@
         <field name="model">product.import</field>
         <field name="arch" type="xml">
             <tree string="Product Import" editable="bottom" multi_edit="1">
+                <header>
+                    <button string="Import Products" type="object" name="import_to_products"/>
+                </header>
                 <field name="sku" readonly="0"/>
                 <field name="condition"/>
                 <field name="manufacturer_barcode"/>
