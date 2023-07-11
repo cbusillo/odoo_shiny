@@ -2,7 +2,9 @@ import os
 import logging
 from pathlib import Path
 
-from ebay_rest import API, Error
+from ebaysdk.trading import Connection
+
+from ebaysdk.exception import ConnectionError
 
 from odoo import models, api
 
@@ -15,22 +17,25 @@ class EbaySync(models.AbstractModel):
     def _setup_complete(self):
         super(EbaySync, self)._setup_complete()
         try:
-            ebay_api = API(application="production_1", user="production_1", path=Path.home() / ".shiny", header="US")
-        except Error as error:
-            logging.fatal(error)
-            os._exit(1)  # pylint: disable=protected-access
-        try:
-            for record in ebay_api.buy_browse_search(q="iphone", sort="price", limit=10):
-                if "record" not in record:
-                    continue
-                logging.info(record["record"].get("title", "No title"))
+            ebay_api = Connection(
+                config_file=Path.home() / ".shiny" / "ebaysdk.yaml",
+                debug=False,
+            )
+        except ConnectionError as error:
+            logging.error(error)
+            logging.error(error.response.dict())
+        request = {
+            "startTimeFrom": "2023-07-01T00:00:00.000Z",
+            "startTimeTo": "2023-07-11T00:00:00.000Z",
+        }
 
-            for record in ebay_api.sell_inventory_get_inventory_items(limit=10):
-                if "record" not in record:
-                    continue
-                logging.info(record["record"].get("product").get("title", "No title"))
-        except Error as error:
-            logging.fatal(error)
-        finally:
-            os._exit(1)  # pylint: disable=protected-access
+        response = ebay_api.execute("GetSellerList", request)
+        for item in response.dict()["ItemArray"]["Item"]:
+            logging.info(item["Title"])
+        print(response.dict())
+
+        os._exit(1)  # pylint: disable=protected-access
         return
+        ebay_api.execute("GetSellerList")
+        for item in ebay_api.response.dict()["ItemArray"]["Item"]:
+            logging.info(item["Title"])
