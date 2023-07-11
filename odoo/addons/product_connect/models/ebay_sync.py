@@ -30,9 +30,8 @@ class EbaySync(models.AbstractModel):
         }
 
         response = ebay_api.execute("GetSellerList", request)
-        for item in response.dict()["ItemArray"]["Item"]:
-            logging.info(item["Title"])
-        print(response.dict())
+        for index, item in enumerate(response.dict()["ItemArray"]["Item"]):
+            logging.info(f'{index}: {item["ItemID"]}')
 
         os._exit(1)  # pylint: disable=protected-access
         return
