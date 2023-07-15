@@ -191,8 +191,15 @@ class ProductImport(models.Model, ProductBinLabelMixin):
             response = requests.get(url, timeout=10)
             response.raise_for_status()
             image_base64 = base64.b64encode(response.content)
-        except requests.exceptions.RequestException as error:
-            raise UserError(_("Error getting image from SKU: %s", self.sku)) from error
+        except requests.exceptions.Timeout:
+            _logger.error(f"Timeout Error getting image from SKU: {self.sku}, URL: {url}")
+            return None
+        except requests.exceptions.RequestException:
+            _logger.error(f"Request Error getting image from SKU: {self.sku}, URL: {url}")
+            return None
+        except Exception as e:
+            _logger.error(f"Unexpected Error getting image from SKU: {self.sku}, URL: {url}, Error: {str(e)}")
+            return None
         return image_base64
 
     def import_to_products(self):
@@ -250,6 +257,9 @@ class ProductImport(models.Model, ProductBinLabelMixin):
                         }
                     )
                     current_index += 1
+                else:
+                    _logger.warning(f"Skipping import of record with SKU: {record.sku} due to image error.")
+                    continue
 
             for image in record.image_ids:
                 self.env["product.image"].create(
