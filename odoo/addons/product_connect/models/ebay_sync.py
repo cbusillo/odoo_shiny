@@ -4,7 +4,7 @@ from pathlib import Path
 
 from ebaysdk.trading import Connection
 
-from ebaysdk.exception import ConnectionError
+import ebaysdk.exception 
 
 from odoo import models, api
 
@@ -21,7 +21,7 @@ class EbaySync(models.AbstractModel):
                 config_file=Path.home() / ".shiny" / "ebaysdk.yaml",
                 debug=False,
             )
-        except ConnectionError as error:
+        except ebaysdk.exception.ConnectionError as error:
             logging.error(error)
             logging.error(error.response.dict())
         request = {
@@ -31,10 +31,8 @@ class EbaySync(models.AbstractModel):
 
         response = ebay_api.execute("GetSellerList", request)
         for index, item in enumerate(response.dict()["ItemArray"]["Item"]):
-            logging.info(f'{index}: {item["ItemID"]}')
+            logging.info('%s: %s', index, item["ItemID"])
 
         os._exit(1)  # pylint: disable=protected-access
         return
-        ebay_api.execute("GetSellerList")
-        for item in ebay_api.response.dict()["ItemArray"]["Item"]:
-            logging.info(item["Title"])
+
