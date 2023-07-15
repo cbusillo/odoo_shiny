@@ -1,7 +1,9 @@
 import base64
 import logging
+import io
 import requests
-from odoo import fields, models, api, _
+from PIL import Image
+from odoo import fields, models, api
 from odoo.exceptions import UserError
 from ..mixins.product_bin_label import ProductBinLabelMixin
 
@@ -99,7 +101,6 @@ class ProductImport(models.Model, ProductBinLabelMixin):
 
     @api.onchange("image_upload")
     def _onchange_image_upload(self):
-        # image_data = base64.b64decode(self.image_upload)  # convert base64 to binary
 
         if self.image_upload:
             image = self.env["product.import.image"].create(
@@ -188,17 +189,23 @@ class ProductImport(models.Model, ProductBinLabelMixin):
         if not url:
             return False
         try:
-            response = requests.get(url, timeout=10)
-            response.raise_for_status()
+            headers = {  # pylint disable=line-too-long
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+            }
+            session = requests.Session()
+            session.headers.update(headers)
+            response = session.get(url, timeout=10)
+            try:
+                Image.open(io.BytesIO(response.content))
+            except IOError:
+                _logger.error("The binary data could not be decoded as an image. URL: %s", url)
+                return None
             image_base64 = base64.b64encode(response.content)
         except requests.exceptions.Timeout:
-            _logger.error(f"Timeout Error getting image from SKU: {self.sku}, URL: {url}")
+            _logger.error("Timeout Error getting image from SKU: %s, URL: %s", self.sku, url)
             return None
         except requests.exceptions.RequestException:
-            _logger.error(f"Request Error getting image from SKU: {self.sku}, URL: {url}")
-            return None
-        except Exception as e:
-            _logger.error(f"Unexpected Error getting image from SKU: {self.sku}, URL: {url}, Error: {str(e)}")
+            _logger.error("Request Error getting image from SKU: %s, URL: %s", self.sku, url)
             return None
         return image_base64
 
@@ -213,6 +220,12 @@ class ProductImport(models.Model, ProductBinLabelMixin):
                 existing_products_display = [f"{product['sku']} - {product['bin']}" for product in existing_products]
                 raise UserError(f"A product with the same MPN already exists.  Its SKU is/are {existing_products_display}")
             product = self.env["product.product"].search([("default_code", "=", record.sku)], limit=1)
+            image_from_url_data = None
+            if record.image_1_url:
+                image_from_url_data = record.get_image_from_url(record.image_1_url)
+                if image_from_url_data is None:
+                    _logger.warning("Skipping import of record with SKU: %s due to image error.", record.sku)
+                    continue
 
             product_data = {
                 "default_code": record.sku or product.default_code,
@@ -246,20 +259,15 @@ class ProductImport(models.Model, ProductBinLabelMixin):
                 if int(image.name or 0) > current_index:
                     current_index = int(image.name or 1)
 
-            if record.image_1_url:
-                image_data = record.get_image_from_url(record.image_1_url)
-                if image_data:
-                    self.env["product.image"].create(
-                        {
-                            "image_1920": image_data,
-                            "product_tmpl_id": product.product_tmpl_id.id,
-                            "name": current_index,
-                        }
-                    )
-                    current_index += 1
-                else:
-                    _logger.warning(f"Skipping import of record with SKU: {record.sku} due to image error.")
-                    continue
+            if image_from_url_data:
+                self.env["product.image"].create(
+                    {
+                        "image_1920": image_from_url_data,
+                        "product_tmpl_id": product.product_tmpl_id.id,
+                        "name": current_index,
+                    }
+                )
+                current_index += 1
 
             for image in record.image_ids:
                 self.env["product.image"].create(
