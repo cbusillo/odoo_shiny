@@ -247,7 +247,7 @@ class ProductImport(models.Model, ProductBinLabelMixin):
                     current_index = int(image.name or 1)
 
             if record.image_1_url:
-                image_data = self.get_image_from_url(record.image_1_url)
+                image_data = record.get_image_from_url(record.image_1_url)
                 if image_data:
                     self.env["product.image"].create(
                         {
